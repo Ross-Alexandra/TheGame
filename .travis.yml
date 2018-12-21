@@ -3,5 +3,12 @@ language: python
 # Setup for python 3.6
 python: "3.6"
 
+install:
+    - pip install codecov
+
 script:
-    - pytest
+    - pytest --cov=thegame
+
+after_success:
+    - codecov
+

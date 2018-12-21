@@ -2,3 +2,4 @@ pygame
 pre-commit
 black
 pylint
+pytest-cov
