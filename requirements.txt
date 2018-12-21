@@ -1,1 +1,4 @@
 pygame
+pre-commit
+black
+pylint
