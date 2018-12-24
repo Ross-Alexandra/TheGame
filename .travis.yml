@@ -10,6 +10,7 @@ install:
 
 script:
     - pytest --cov=thegame
+    - black . --check
 
 after_success:
     - codecov
