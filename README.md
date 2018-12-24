@@ -5,3 +5,15 @@
 
 # TheGame
 A basic 2D game with no current ideas for story, setting, etc.
+
+# Installation
+To install the requirements for this project, please run
+```
+pip install -r requirements.txt
+```
+
+This project also uses pre-commit, this means after installing, you should run:
+```
+pre-commit install
+```
+This should cause the pre-commit hooks to run.
