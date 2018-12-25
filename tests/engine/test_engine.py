@@ -84,3 +84,22 @@ def test_multiple_events_both_get_handled(event_get_mock, logging_mock):
 
     assert not game.running
     assert logging_mock.debug.called
+
+
+@patch("thegame.engine.engine.pygame.init", Mock())
+@patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.event.get")
+@patch("thegame.engine.engine.pygame.key.get_pressed")
+@patch("thegame.engine.engine.Engine._handle_keystrokes")
+def test_holding_down_character_only_counts_as_one_call(
+    keystroke_handle_mock, key_pressed_mock, event_get_mock
+):
+    event_get_mock.return_value = [DummyEvent(pygame.QUIT)]
+    a_key_pressed = [0 for _ in range(355)]
+    a_key_pressed[ord("a")] = True
+    key_pressed_mock.return_value = a_key_pressed
+
+    game = Engine()
+    game.start()
+
+    keystroke_handle_mock.assert_called_once_with(["a"])

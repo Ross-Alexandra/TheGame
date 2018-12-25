@@ -68,9 +68,7 @@ class Engine:
 
             # Handle the keys that were pressed
             if len(pressed_keys) > 0:
-                keys_string = f"Pressed keys: {pressed_keys}"
-                logging.info(keys_string)
-
+                self._handle_keystrokes(pressed_keys)
                 previous_pressed_keys = pressed_keys
 
     def _handle_event(self, event):
@@ -83,3 +81,7 @@ class Engine:
 
         else:
             logging.debug("Unrecognized event type was unrecognized.")
+
+    def _handle_keystrokes(self, keystrokes):
+        keys_string = f"Pressed keys: {keystrokes}"
+        logging.info(keys_string)
