@@ -1,0 +1,7 @@
+pre-commit
+black
+pylint
+pytest
+pytest-cov
+codecov
+isort
