@@ -18,19 +18,22 @@ class Engine:
     def start(self):
         self.running = True
         try:
+            logging.info("Starting engine.")
             self._main_loop()
+            pygame.quit()
+
         except Exception as e:
             logging.exception(f"Exception caught in main loop: {e}")
-
-            self.running = False
             raise
 
-        logging.info("Engine started.")
+        finally:
+            logging.info("Pygame successfully uninitialized.")
+            self.running = False
 
     def _main_loop(self):
 
         previous_pressed_keys = None
-        logging.info("mail loop started.")
+        logging.info("main loop started.")
 
         while self.running:
 
@@ -73,14 +76,13 @@ class Engine:
 
     def _handle_event(self, event):
 
-        logging.info("Got event of type {pygame.event.event_name(event)}")
+        logging.info(f"Got event of type {pygame.event.event_name(event.type)}")
 
         if event.type == pygame.QUIT:
             self.running = False
-            pygame.quit()
 
         else:
-            logging.debug("Unrecognized event type was unrecognized.")
+            logging.debug("Unrecognized event type found.")
 
     def _handle_keystrokes(self, keystrokes):
         keys_string = f"Pressed keys: {keystrokes}"
