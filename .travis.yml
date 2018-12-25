@@ -4,11 +4,13 @@ language: python
 python: "3.6"
 
 install:
+    - pip install -r requirements.txt
     - pip install codecov
     - pip install pytest-cov
 
 script:
     - pytest --cov=thegame
+    - black . --check
 
 after_success:
     - codecov
