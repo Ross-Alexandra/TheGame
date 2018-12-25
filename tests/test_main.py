@@ -8,6 +8,7 @@ from thegame.__main__ import start_game
 
 @patch("thegame.engine.engine.pygame.init", Mock())
 @patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.key.get_pressed", list)
 @patch("thegame.engine.engine.pygame.event.get")
 def test_init_starts_the_engine(event_get_mock):
     """ This test tests that starting the game and returning sending
