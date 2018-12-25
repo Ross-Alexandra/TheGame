@@ -1,5 +1,6 @@
 import logging
 from multiprocessing.pool import ThreadPool
+from time import sleep
 
 import pygame
 
@@ -44,11 +45,7 @@ class Engine:
             number_of_events = len(events)
 
             # Get the keys that were pressed.
-            pressed_keys = [
-                chr(index)
-                for index, key_pressed in enumerate(pygame.key.get_pressed())
-                if key_pressed
-            ]
+            pressed_keys = self._get_keystrokes()
 
             # Because this loop runs many times a second,
             # a "tap" is interpreted as a hold.
@@ -76,7 +73,7 @@ class Engine:
 
     def _handle_event(self, event):
 
-        logging.info(f"Got event of type {pygame.event.event_name(event.type)}")
+        logging.debug(f"Got event of type {pygame.event.event_name(event.type)}")
 
         if event.type == pygame.QUIT:
             self.running = False
@@ -87,3 +84,22 @@ class Engine:
     def _handle_keystrokes(self, keystrokes):
         keys_string = f"Pressed keys: {keystrokes}"
         logging.info(keys_string)
+
+    @staticmethod
+    def _get_keystrokes():
+        """TODO: As of current, pressing two keys at the same time
+            (well, almost the same time, like a normal human would)
+            causes a keystroke of the first letter, then both letters
+            to occur. This should be changed somehow to just have the
+            one keystroke of both characters.
+            This may be solved by movement ticks, as there is an extremely
+            short period of time where there is only one key down when
+            there should be two."""
+
+        pressed_keys = [
+            chr(index)
+            for index, key_pressed in enumerate(pygame.key.get_pressed())
+            if key_pressed
+        ]
+
+        return pressed_keys
