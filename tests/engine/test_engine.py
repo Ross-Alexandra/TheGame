@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 
 import pygame
 import pytest
+
 from tests.test_utils import DummyEvent
 from thegame.engine.engine import Engine
 
