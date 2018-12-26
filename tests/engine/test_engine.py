@@ -2,6 +2,7 @@ from threading import Thread
 from unittest.mock import Mock, patch
 
 import pygame
+import pytest
 
 from tests.test_utils import DummyEvent
 from thegame.engine.engine import Engine
@@ -23,10 +24,12 @@ def test_init_initializes_game_window(display_mock, init_mock):
 @patch("thegame.engine.engine.logging")
 @patch("thegame.engine.engine.Engine._main_loop")
 def test_exception_in_main_loop_is_caught(main_loop_mock, logging_mock):
-    main_loop_mock.side_effect = Mock(spec=ValueError)
 
-    game = Engine()
-    game.start()
+    with pytest.raises(ValueError):
+        main_loop_mock.side_effect = ValueError
+
+        game = Engine()
+        game.start()
 
     assert logging_mock.exception.called
     assert not game.running
@@ -34,6 +37,7 @@ def test_exception_in_main_loop_is_caught(main_loop_mock, logging_mock):
 
 @patch("thegame.engine.engine.pygame.init", Mock())
 @patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.key.get_pressed", list)
 @patch("thegame.engine.engine.pygame.event.get")
 def test_no_events_gotten_doesnt_cause_an_error(event_get_mock):
     """ This test simply ensures that no exceptions are thrown
@@ -56,6 +60,7 @@ def test_no_events_gotten_doesnt_cause_an_error(event_get_mock):
 
 @patch("thegame.engine.engine.pygame.init", Mock())
 @patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.key.get_pressed", list)
 @patch("thegame.engine.engine.pygame.event.get")
 def test_quit_event_causes_stopping_to_be_set_to_false(event_get_mock):
     event_get_mock.return_value = [DummyEvent(pygame.QUIT)]
@@ -68,13 +73,34 @@ def test_quit_event_causes_stopping_to_be_set_to_false(event_get_mock):
 
 @patch("thegame.engine.engine.pygame.init", Mock())
 @patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.event.event_name", Mock())
+@patch("thegame.engine.engine.pygame.key.get_pressed", list)
 @patch("thegame.engine.engine.logging")
 @patch("thegame.engine.engine.pygame.event.get")
 def test_multiple_events_both_get_handled(event_get_mock, logging_mock):
-    event_get_mock.return_value = [DummyEvent(pygame.QUIT), DummyEvent("cats")]
+    event_get_mock.return_value = [DummyEvent("cats"), DummyEvent(pygame.QUIT)]
 
     game = Engine()
     game.start()
 
     assert not game.running
-    assert logging_mock.warning.called
+    assert logging_mock.debug.called
+
+
+@patch("thegame.engine.engine.pygame.init", Mock())
+@patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.event.get")
+@patch("thegame.engine.engine.pygame.key.get_pressed")
+@patch("thegame.engine.engine.Engine._handle_keystrokes")
+def test_holding_down_character_only_counts_as_one_call(
+    keystroke_handle_mock, key_pressed_mock, event_get_mock
+):
+    event_get_mock.return_value = [DummyEvent(pygame.QUIT)]
+    a_key_pressed = [0 for _ in range(355)]
+    a_key_pressed[ord("a")] = True
+    key_pressed_mock.return_value = a_key_pressed
+
+    game = Engine()
+    game.start()
+
+    keystroke_handle_mock.assert_called_once_with(["a"])
