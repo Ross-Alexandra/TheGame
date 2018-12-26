@@ -73,20 +73,12 @@ def test_quit_event_causes_stopping_to_be_set_to_false(event_get_mock):
 
 @patch("thegame.engine.engine.pygame.init", Mock())
 @patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.event.event_name", Mock())
 @patch("thegame.engine.engine.pygame.key.get_pressed", list)
 @patch("thegame.engine.engine.logging")
 @patch("thegame.engine.engine.pygame.event.get")
 def test_multiple_events_both_get_handled(event_get_mock, logging_mock):
-    """ Note, this test relies on passing an event that is not currently being
-        watched for in Engine._handle_event. Should the MOUSEMOTION event be
-        watched for in the future, this set will start to fail. If it does not,
-        then a logging.debug is being used there as well, and this test should
-        be changed anyways."""
-
-    event_get_mock.return_value = [
-        DummyEvent(pygame.MOUSEMOTION),
-        DummyEvent(pygame.QUIT),
-    ]
+    event_get_mock.return_value = [DummyEvent("cats"), DummyEvent(pygame.QUIT)]
 
     game = Engine()
     game.start()
