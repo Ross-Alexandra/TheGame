@@ -5,7 +5,7 @@ import pygame
 import pytest
 
 from tests.test_utils import DummyEvent
-from thegame.engine.engine import Engine
+from thegame.engine import Engine
 
 
 @patch("thegame.engine.engine.pygame.init")
@@ -22,7 +22,7 @@ def test_init_initializes_game_window(display_mock, init_mock):
 @patch("thegame.engine.engine.pygame.init", Mock())
 @patch("thegame.engine.engine.pygame.display", Mock())
 @patch("thegame.engine.engine.logging")
-@patch("thegame.engine.engine.Engine._main_loop")
+@patch("thegame.engine.Engine._main_loop")
 def test_exception_in_main_loop_is_caught(main_loop_mock, logging_mock):
 
     with pytest.raises(ValueError):
@@ -91,7 +91,7 @@ def test_multiple_events_both_get_handled(event_get_mock, logging_mock):
 @patch("thegame.engine.engine.pygame.display", Mock())
 @patch("thegame.engine.engine.pygame.event.get")
 @patch("thegame.engine.engine.pygame.key.get_pressed")
-@patch("thegame.engine.engine.Engine._handle_keystrokes")
+@patch("thegame.engine.Engine._handle_keystrokes")
 def test_holding_down_character_only_counts_as_one_call(
     keystroke_handle_mock, key_pressed_mock, event_get_mock
 ):

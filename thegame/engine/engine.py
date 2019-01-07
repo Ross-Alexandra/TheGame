@@ -1,16 +1,20 @@
 import logging
 from multiprocessing.pool import ThreadPool
-from time import sleep
 
 import pygame
 
+from .base_game import BaseGame
+from .base_menu import BaseMenu
+
 
 class Engine:
-    def __init__(self):
+    def __init__(self, game: BaseGame):
         self.width = 240
         self.height = 180
         self.size = self.width, self.height
         self.running = False
+        self.mouse_down_pos = None
+        self.context = game
 
         pygame.init()
         pygame.display.set_caption("TheGame")
@@ -78,10 +82,80 @@ class Engine:
         if event.type == pygame.QUIT:
             self.running = False
 
+        if event.type == pygame.MOUSEBUTTONUP and self.mouse_down_pos is not None:
+
+            # Get the initial and final position positions of the mouse from when the click (and hold)
+            # occurred.
+            init_x, init_y = self.mouse_down_pos
+            final_x, final_y = pygame.mouse.get_pos()
+            self.mouse_down_pos = None
+
+            logging.info(f"Mouse button released at position ({final_x}, {final_y})")
+
+            # If the current active screen is a menu, then call attempt to call and
+            # interactive zone (only works if one has been registered where the click happened.)
+            if isinstance(self.context.active_screen, BaseMenu):
+                self.context.active_menu.call_interactive_zone_by_click(
+                    init_x, init_y, final_x, final_y, game_context=self.context
+                )
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            self.mouse_down_pos = pygame.mouse.get_pos()
+            press_x, press_y = self.mouse_down_pos
+
+            logging.info(f"Mouse button pressed at position ({press_x}, {press_y})")
+
         else:
             logging.debug("Unrecognized event type found.")
 
     def _handle_keystrokes(self, keystrokes):
+
+        up_arrow = chr(273)
+        down_arrow = chr(274)
+
+        # If the current active screen is a menu
+        if isinstance(self.context.active_screen, BaseMenu):
+
+            # If there is currently no focused interactive zone.
+            if self.context.active_menu.focused_zone is not None:
+
+                # If the UP arrow is pressed, set the focused zone to the last one.
+                if up_arrow in keystrokes:
+                    self.context.active_menu.focused_zone = (
+                        self.context.active_menu.interactive_zone_count() - 1
+                    )
+
+                # If the DOWN arrow is pressed, set the focused zone to the first one.
+                elif down_arrow in keystrokes:
+                    self.context.active_menu.focused_zone = 0
+
+            # If there is currently a focused interactive zone.
+            else:
+
+                # If the UP arrow is pressed, set the focused zone to the previous one.
+                if up_arrow in keystrokes:
+                    self.context.active_menu.focused_zone -= 1
+                    if self.context.active_menu.focused_zone < 0:
+                        self.context.active_menu.focused_zone = (
+                            self.context.active_menu.interactive_zone_count()
+                        )
+
+                # If the DOWN arrow is pressed, set the focused zone to the next one.
+                elif down_arrow in keystrokes:
+                    self.context.active_menu.focused_zone += 1
+                    if (
+                        self.context.active_menu.focused_zone
+                        >= self.context.active_menu.interactive_zone_count()
+                    ):
+                        self.context.active_menu.focused_zone = 0
+
+                # If the ENTER key is pressed, call the interaction associated with
+                # the currently focused interactive zone.
+                elif "\r" in keystrokes or "\n" in keystrokes:
+                    self.context.active_menu.call_interactive_zone_by_index(
+                        self.context.active_menu.focused_zone, self.context
+                    )
+
         keys_string = f"Pressed keys: {keystrokes}"
         logging.info(keys_string)
 
