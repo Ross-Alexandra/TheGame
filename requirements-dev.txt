@@ -2,7 +2,7 @@ pre-commit
 black
 pylint
 pytest>=3.6
-pytest-cov
+pytest-cov>=2.6.1
 codecov
 seed-isort-config
 isort
