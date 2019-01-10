@@ -1,3 +1,6 @@
+import logging
+
+
 class BaseMenu:
     """ A base class for defining the behavior of a menu in a game.
 
@@ -40,28 +43,61 @@ class BaseMenu:
             init_y_pos = final_y_pos
             final_y_pos = _
 
-        interactive_zone = init_x_pos, init_y_pos, final_x_pos, final_y_pos, interaction
+        new_interactive_zone = (
+            init_x_pos,
+            init_y_pos,
+            final_x_pos,
+            final_y_pos,
+            interaction,
+        )
 
         for interactive_zone in self._interactive_zones:
 
             # Check if this interactive_zone overlaps with a pre-existing one.
             if (
-                interactive_zone[self.INIT_X_POS_INDEX] <= init_x_pos
-                and interactive_zone[self.INIT_Y_POS_INDEX] <= init_y_pos
-                or interactive_zone[self.FINAL_X_POS_INDEX] <= final_x_pos
-                and interactive_zone[self.FINAL_Y_POS_INDEX] <= final_y_pos
+                (
+                    interactive_zone[self.INIT_X_POS_INDEX]
+                    <= init_x_pos
+                    <= interactive_zone[self.FINAL_X_POS_INDEX]
+                    or interactive_zone[self.INIT_X_POS_INDEX]
+                    <= final_x_pos
+                    <= interactive_zone[self.FINAL_X_POS_INDEX]
+                )
+                and (
+                    interactive_zone[self.INIT_Y_POS_INDEX]
+                    <= init_y_pos
+                    <= interactive_zone[self.FINAL_Y_POS_INDEX]
+                    or interactive_zone[self.INIT_Y_POS_INDEX]
+                    <= final_y_pos
+                    <= interactive_zone[self.FINAL_Y_POS_INDEX]
+                )
+                or (
+                    interactive_zone[self.INIT_X_POS_INDEX] >= init_x_pos
+                    and interactive_zone[self.FINAL_X_POS_INDEX] <= final_x_pos
+                    and interactive_zone[self.INIT_Y_POS_INDEX] >= init_y_pos
+                    and interactive_zone[self.FINAL_Y_POS_INDEX] <= final_y_pos
+                )
             ):
                 exception_string = (
                     f"Interactive zone being registered with ({init_x_pos}, {init_y_pos}),"
-                    f"({final_x_pos}, {final_y_pos}"
+                    f"({final_x_pos}, {final_y_pos}) overlaps with pre-existing zone."
+                    f"({interactive_zone[self.INIT_X_POS_INDEX]}, {interactive_zone[self.INIT_Y_POS_INDEX]}), "
+                    f"({interactive_zone[self.FINAL_X_POS_INDEX]}, {interactive_zone[self.FINAL_X_POS_INDEX]})."
                 )
 
                 raise self.OverlappingInteractiveZoneException(exception_string)
 
-        self._interactive_zones.append(interactive_zone)
+        logging.debug(f"Creating interactive zone: {new_interactive_zone} ")
+        self._interactive_zones.append(new_interactive_zone)
+
+    def get_interactive_zones(self):
+        """ Return a copy list of interactive zones. """
+        return list(self._interactive_zones)
 
     def call_interactive_zone_by_index(self, index, game_context):
-        self._interactive_zones[index](game_context=game_context)
+        self._interactive_zones[index][self.INTERACTION_INDEX](
+            game_context=game_context
+        )
 
     def call_interactive_zone_by_click(
         self, init_x_pos, init_y_pos, final_x_pos, final_y_pos, game_context
@@ -79,10 +115,19 @@ class BaseMenu:
 
             # Check if this interactive_zone was clicked.
             if (
-                interactive_zone[self.INIT_X_POS_INDEX] <= comparison_init_x
-                and interactive_zone[self.INIT_Y_POS_INDEX] <= comparison_init_y
-                and interactive_zone[self.FINAL_X_POS_INDEX] <= comparison_final_x
-                and interactive_zone[self.FINAL_Y_POS_INDEX] <= comparison_final_y
+                interactive_zone[self.INIT_X_POS_INDEX]
+                <= comparison_init_x
+                <= interactive_zone[self.FINAL_X_POS_INDEX]
+                and interactive_zone[self.INIT_X_POS_INDEX]
+                <= comparison_final_x
+                <= interactive_zone[self.FINAL_X_POS_INDEX]
+            ) and (
+                interactive_zone[self.INIT_Y_POS_INDEX]
+                <= comparison_init_y
+                <= interactive_zone[self.FINAL_Y_POS_INDEX]
+                and interactive_zone[self.INIT_Y_POS_INDEX]
+                <= comparison_final_y
+                <= interactive_zone[self.FINAL_Y_POS_INDEX]
             ):
                 interactive_zone[self.INTERACTION_INDEX](
                     init_x_pos=init_x_pos,
