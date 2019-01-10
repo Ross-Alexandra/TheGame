@@ -80,8 +80,21 @@ def test_tile_sheets_is_list_of_specific_sheets():
     assert tiles[Map.BACKGROUND_SHEET_INDEX] == background_sheet
 
 
-@pytest.mark.parametrize("x_pos, y_pos, final_x, final_y", [(0, 0, 1, 0), (1, 0, 0, 0)])
-def test_register_warp_zone_correctly_adds_zone(x_pos, y_pos, final_x, final_y):
+def test_register_warp_zone_correctly_adds_zone():
+
+    foreground_sheet = generate_sheet(True)
+    path_sheet = generate_sheet(True)
+    background_sheet = generate_sheet(True)
+    character_sheet = generate_sheet(True)
+    test_map = Map(foreground_sheet, path_sheet, background_sheet, character_sheet)
+
+    test_map.register_warp_zone(0, 0, test_map, 0, 0)
+
+    assert (0, 0, 0, 0, test_map, 0, 0) in test_map._warp_zones
+
+
+@pytest.mark.parametrize("x_pos, y_pos, final_x, final_y", [(0, 0, 1, 1), (1, 1, 0, 0)])
+def test_register_warp_zone_correctly_adds_large_zone(x_pos, y_pos, final_x, final_y):
 
     foreground_sheet = generate_sheet(True)
     path_sheet = generate_sheet(True)
@@ -94,7 +107,7 @@ def test_register_warp_zone_correctly_adds_zone(x_pos, y_pos, final_x, final_y):
         x_pos, y_pos, warp_map, 0, 0, final_x_pos=final_x, final_y_pos=final_y
     )
 
-    assert (0, 0, 1, 0, warp_map, 0, 0) in test_map._warp_zones
+    assert (0, 0, 1, 1, warp_map, 0, 0) in test_map._warp_zones
 
 
 def test_registering_warp_zone_outside_warp_location_raises_exception():
