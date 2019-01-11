@@ -4,13 +4,8 @@ from unittest.mock import Mock
 
 import pytest
 
+from tests.test_utils import get_base_menu
 from thegame.engine import BaseMenu, Button
-
-
-def get_base_menu():
-    # TODO: Once actual image loading has been implemented
-    # this mock should probably have some return values.
-    return BaseMenu(Mock())
 
 
 def interaction():

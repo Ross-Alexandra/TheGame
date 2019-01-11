@@ -1,4 +1,4 @@
-from thegame.engine import BaseGame, Map
+from thegame.engine import BaseGame
 
 
 class TheGame(BaseGame):

@@ -1,19 +1,7 @@
-from unittest.mock import Mock
-
 import pytest
 
+from tests.test_utils import generate_sheet, generate_valid_map
 from thegame.engine import Map
-from thegame.engine.game_objects import GameObject
-
-
-def generate_sheet(data_is_valid, contents_are_valid=True):
-    if not contents_are_valid:
-        return [None, None, None, None]
-
-    if data_is_valid or data_is_valid is None:
-        return [[None, None], [None, None]]
-    else:
-        return [[1, 1], [1, 1]]
 
 
 @pytest.mark.parametrize(
@@ -82,11 +70,7 @@ def test_tile_sheets_is_list_of_specific_sheets():
 
 def test_register_warp_zone_correctly_adds_zone():
 
-    foreground_sheet = generate_sheet(True)
-    path_sheet = generate_sheet(True)
-    background_sheet = generate_sheet(True)
-    character_sheet = generate_sheet(True)
-    test_map = Map(foreground_sheet, path_sheet, background_sheet, character_sheet)
+    test_map = generate_valid_map()
 
     test_map.register_warp_zone(0, 0, test_map, 0, 0)
 
@@ -96,12 +80,8 @@ def test_register_warp_zone_correctly_adds_zone():
 @pytest.mark.parametrize("x_pos, y_pos, final_x, final_y", [(0, 0, 1, 1), (1, 1, 0, 0)])
 def test_register_warp_zone_correctly_adds_large_zone(x_pos, y_pos, final_x, final_y):
 
-    foreground_sheet = generate_sheet(True)
-    path_sheet = generate_sheet(True)
-    background_sheet = generate_sheet(True)
-    character_sheet = generate_sheet(True)
-    test_map = Map(foreground_sheet, path_sheet, background_sheet, character_sheet)
-    warp_map = Map(foreground_sheet, path_sheet, background_sheet, character_sheet)
+    test_map = generate_valid_map()
+    warp_map = generate_valid_map()
 
     test_map.register_warp_zone(
         x_pos, y_pos, warp_map, 0, 0, final_x_pos=final_x, final_y_pos=final_y
@@ -111,11 +91,8 @@ def test_register_warp_zone_correctly_adds_large_zone(x_pos, y_pos, final_x, fin
 
 
 def test_registering_warp_zone_outside_warp_location_raises_exception():
-    foreground_sheet = generate_sheet(True)
-    path_sheet = generate_sheet(True)
-    background_sheet = generate_sheet(True)
-    character_sheet = generate_sheet(True)
-    test_map = Map(foreground_sheet, path_sheet, background_sheet, character_sheet)
+
+    test_map = generate_valid_map()
 
     # Try to create a warp zone to 10, 10 in a 2x2 sheet.
     with pytest.raises(Map.InvalidWarpZoneLocationException):

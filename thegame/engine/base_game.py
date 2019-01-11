@@ -40,4 +40,5 @@ class BaseGame:
         if new_map is None:
             raise ValueError(f"No map registered with name '{map_name}'")
 
-        # TODO: Implement the map being changed that *may* be conscious of not closing a menu.
+        # Set the active screen to the new map. This will close any menus.
+        self.active_screen = new_map
