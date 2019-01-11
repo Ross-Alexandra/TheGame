@@ -41,13 +41,6 @@ class Engine:
         logging.info("main loop started.")
 
         while self.running:
-
-            # Get the events, and the number of them.
-            # Get the number here as it is used multiple
-            # times, speeding this up.
-            events = pygame.event.get()
-            number_of_events = len(events)
-
             # Get the keys that were pressed.
             pressed_keys = self._get_keystrokes()
 
@@ -59,6 +52,17 @@ class Engine:
             else:
                 previous_pressed_keys = None
 
+            # Handle the keys that were pressed
+            if len(pressed_keys) > 0:
+                self._handle_keystrokes(pressed_keys)
+                previous_pressed_keys = pressed_keys
+
+            # Get the events, and the number of them.
+            # Get the number here as it is used multiple
+            # times, speeding this up.
+            events = pygame.event.get()
+            number_of_events = len(events)
+
             # Handle events if any have come in.
             if number_of_events > 0:
 
@@ -67,19 +71,32 @@ class Engine:
                 # didn't happen.
                 event_pool = ThreadPool(processes=number_of_events)
 
+                exception_check = []
                 for event in events:
-                    event_pool.apply_async(self._handle_event, args=(event,))
+                    if self.running:
+                        exception_check.append(
+                            (
+                                event_pool.apply_async(
+                                    self._handle_event, args=(event,)
+                                ),
+                                event,
+                            )
+                        )
 
-            # Handle the keys that were pressed
-            if len(pressed_keys) > 0:
-                self._handle_keystrokes(pressed_keys)
-                previous_pressed_keys = pressed_keys
+                for possible_exception, event in exception_check:
+                    try:
+                        possible_exception.get()
+                    except Exception as e:
+                        self.running = False
+                        logging.exception(f"Caught exception while handling {e}")
+                        #                                          f"'{pygame.event.event_name(event.type)}' event: '{e}'.")
+                        break
 
     def _handle_event(self, event):
-
         logging.debug(f"Got event of type {pygame.event.event_name(event.type)}")
 
-        if event.type == pygame.QUIT:
+        # If the game is not running, don't handle events.
+        if event.type == pygame.QUIT or not self.running:
             self.running = False
 
         if event.type == pygame.MOUSEBUTTONUP and self.mouse_down_pos is not None:
@@ -106,7 +123,9 @@ class Engine:
             logging.info(f"Mouse button pressed at position ({press_x}, {press_y})")
 
         else:
-            logging.debug("Unrecognized event type found.")
+            logging.debug(
+                f"Unrecognized event type '{pygame.event.event_name(event.type)}' found."
+            )
 
     def _handle_keystrokes(self, keystrokes):
 
@@ -117,7 +136,7 @@ class Engine:
         if isinstance(self.context.active_screen, BaseMenu):
 
             # If there is currently no focused interactive zone.
-            if self.context.active_menu.focused_zone is not None:
+            if self.context.active_menu.focused_zone is None:
 
                 # If the UP arrow is pressed, set the focused zone to the last one.
                 if up_arrow in keystrokes:
