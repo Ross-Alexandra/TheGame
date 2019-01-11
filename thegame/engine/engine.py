@@ -88,8 +88,10 @@ class Engine:
                         possible_exception.get()
                     except Exception as e:
                         self.running = False
-                        logging.exception(f"Caught exception while handling {e}")
-                        #                                          f"'{pygame.event.event_name(event.type)}' event: '{e}'.")
+                        logging.exception(
+                            f"Caught exception while handling "
+                            f"'{pygame.event.event_name(event.type)}' event: '{e}'."
+                        )
                         break
 
     def _handle_event(self, event):
