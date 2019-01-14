@@ -1,5 +1,5 @@
 from threading import Thread
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, call, patch
 
 import pygame
 import pytest
@@ -8,7 +8,7 @@ from tests.test_utils import DOWN_ARROW_CHAR, UP_ARROW_CHAR, DummyEvent
 from thegame.engine import BaseGame, BaseMenu, Engine
 
 
-def generate_keypress_pattern(characters):
+def generate_keypress_pattern(characters, convert_to_keystroke=True):
     """ Returns a list of keystroke lists which can be fed into a
         mock.side_effect to generate a sequence of key presses.
         Ex) for a, ab, a, b
@@ -20,8 +20,12 @@ def generate_keypress_pattern(characters):
     keypresses = []
 
     for character in characters:
-        keypresses.append(generate_keystroke_list([character]))
-        keypresses.append(generate_keystroke_list([]))
+        if character is None:
+            keypresses.append(generate_keystroke_list([]))
+        else:
+            keypresses.append(generate_keystroke_list([character]))
+            if convert_to_keystroke:
+                keypresses.append(generate_keystroke_list([]))
 
     return keypresses
 
@@ -251,3 +255,59 @@ def test_handle_event_raises_exception_causes_game_to_stop(
     engine.start()
 
     assert not engine.running
+
+
+@patch("thegame.engine.engine.pygame.init", Mock())
+@patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.event.get", MagicMock())
+@patch("thegame.engine.engine.pygame.key.get_pressed")
+@patch("thegame.engine.engine.Engine._handle_keystrokes")
+@pytest.mark.parametrize(
+    "keystroke_pattern",
+    [
+        (["w", "w", "w", "w"]),
+        (["a", "a", "s", "s"]),
+        (["d", "s", None, "s", "d"]),
+        (["w", None, "s", None, "a", None, "d", "d", "d"]),
+    ],
+)
+def test_held_keys_are_not_handled_as_multiple_keystrokes(
+    handle_keypress_mock, keypress_mock, keystroke_pattern
+):
+
+    keypress_mock.side_effect = generate_keypress_pattern(
+        keystroke_pattern, convert_to_keystroke=False
+    )
+
+    engine = Engine(Mock())
+
+    try:
+        engine.start()
+    except StopIteration:
+        # When keypresses have run out, a StopIteration exception will be thrown by mock.
+        # This exception will be used to tell when the necessary testing is done, and to
+        # stop the game, hence, pass.
+        pass
+
+    call_args = handle_keypress_mock.call_args_list
+    presses = []
+    calls = []
+
+    print(call_args)
+
+    # Check that each call had the previous call's
+    # keystroke(s), as well as its own keystroke.
+    for index, keystroke in enumerate(keystroke_pattern):
+        presses.append(keystroke)
+        if keystroke is None:
+            presses.clear()
+
+        # Remove duplicates, as these shouldn't exist in
+        # the actual calls.
+        current_presses_call = call(list(set(presses)))
+
+        # If this call isn't the same as the last one.
+        if len(calls) > 0 and calls[-1] != current_presses_call:
+            calls.append(current_presses_call)
+
+    handle_keypress_mock.assert_has_calls(calls, any_order=True)

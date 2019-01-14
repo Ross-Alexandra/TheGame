@@ -41,6 +41,12 @@ class Engine:
         logging.info("main loop started.")
 
         while self.running:
+            # TODO: Attempt moving the keystroke logic into
+            #       the event hanlding logic under both
+            #       keypress and keyrelease events. This
+            #       might deal with detecting holds
+            #       auto-magically.
+
             # Get the keys that were pressed.
             pressed_keys = self._get_keystrokes()
 
