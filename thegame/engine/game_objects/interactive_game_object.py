@@ -11,4 +11,7 @@ class InteractiveGameObject(GameObject):
     def interact(self, context):
         """ The method that will be called when this object is interacted with."""
 
-        pass
+        raise NotImplementedError(
+            "interact method should be implemented by an implementer"
+            "of the InteractiveGameObject class."
+        )
