@@ -158,7 +158,7 @@ class Engine:
                     self.context.active_menu.focused_zone -= 1
                     if self.context.active_menu.focused_zone < 0:
                         self.context.active_menu.focused_zone = (
-                            self.context.active_menu.interactive_zone_count()
+                            self.context.active_menu.interactive_zone_count() - 1
                         )
 
                 # If the DOWN arrow is pressed, set the focused zone to the next one.

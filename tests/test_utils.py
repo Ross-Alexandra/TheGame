@@ -3,6 +3,9 @@ from unittest.mock import Mock
 
 import thegame.engine as engine
 
+UP_ARROW_CHAR = chr(273)
+DOWN_ARROW_CHAR = chr(274)
+
 
 class DummyEvent:
     """ An event that can be used to simulate a real event for testing."""

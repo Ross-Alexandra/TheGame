@@ -4,8 +4,26 @@ from unittest.mock import MagicMock, Mock, patch
 import pygame
 import pytest
 
-from tests.test_utils import DummyEvent
+from tests.test_utils import DOWN_ARROW_CHAR, UP_ARROW_CHAR, DummyEvent
 from thegame.engine import BaseGame, BaseMenu, Engine
+
+
+def generate_keypress_pattern(characters):
+    """ Returns a list of keystroke lists which can be fed into a
+        mock.side_effect to generate a sequence of key presses.
+        Ex) for a, ab, a, b
+
+        generate_keypress_patterns(["a", "ab", "a", "b"])
+
+    """
+
+    keypresses = []
+
+    for character in characters:
+        keypresses.append(generate_keystroke_list([character]))
+        keypresses.append(generate_keystroke_list([]))
+
+    return keypresses
 
 
 def generate_keystroke_list(characters_pressed):
@@ -176,28 +194,31 @@ def test_mouse_button_up_calls_interaction_in_menu(event_get_mock):
 @patch("thegame.engine.engine.pygame.display", Mock())
 @patch("thegame.engine.engine.pygame.event.get", MagicMock())
 @patch("thegame.engine.engine.pygame.key.get_pressed")
-def test_arrow_keys_can_be_used_to_interact_with_a_menu(keypress_mock):
+@pytest.mark.parametrize(
+    "keystroke_pattern, interaction_index",
+    [
+        ([UP_ARROW_CHAR, "\r"], 1),
+        ([DOWN_ARROW_CHAR, "\r"], 0),
+        ([UP_ARROW_CHAR, DOWN_ARROW_CHAR, "\r"], 0),
+        ([DOWN_ARROW_CHAR, UP_ARROW_CHAR, "\r"], 1),
+    ],
+)
+def test_arrow_keys_can_be_used_to_interact_with_a_menu(
+    keypress_mock, keystroke_pattern, interaction_index
+):
 
-    up_arrow = chr(273)
-    down_arrow = chr(274)
-
-    keypress_mock.side_effect = [
-        generate_keystroke_list([up_arrow]),
-        generate_keystroke_list([]),
-        generate_keystroke_list([up_arrow]),
-        generate_keystroke_list([]),
-        generate_keystroke_list([down_arrow]),
-        generate_keystroke_list([]),
-        generate_keystroke_list([down_arrow]),
-        generate_keystroke_list([]),
-        generate_keystroke_list(["\r"]),
-        generate_keystroke_list([]),
-    ]
+    keypress_mock.side_effect = generate_keypress_pattern(keystroke_pattern)
 
     mock_interaction = Mock()
     menu = BaseMenu(Mock())
-    menu.register_interactive_zone(0, 0, 0, 0, mock_interaction)
-    menu.register_interactive_zone(1, 1, 1, 1, Mock())
+
+    menu.register_interactive_zone(
+        0, 0, 0, 0, Mock() if interaction_index == 1 else mock_interaction
+    )
+    menu.register_interactive_zone(
+        1, 1, 1, 1, Mock() if interaction_index == 0 else mock_interaction
+    )
+
     game = BaseGame(menu)
     engine = Engine(game)
 
@@ -209,5 +230,24 @@ def test_arrow_keys_can_be_used_to_interact_with_a_menu(keypress_mock):
         # stop the game, hence, pass.
         pass
 
-    assert game.active_menu.focused_zone == 0
+    assert game.active_menu.focused_zone == interaction_index
     assert mock_interaction.called
+
+
+@patch("thegame.engine.engine.pygame.init", Mock())
+@patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.key.get_pressed", MagicMock())
+@patch("thegame.engine.engine.Engine._handle_event")
+@patch("thegame.engine.engine.pygame.event.get")
+def test_handle_event_raises_exception_causes_game_to_stop(
+    event_get_mock, event_handle_mock
+):
+
+    event_get_mock.return_value = [DummyEvent(pygame.MOUSEBUTTONDOWN)]
+
+    engine = Engine(Mock())
+    event_handle_mock.side_effect = Mock(spec=ValueError)
+
+    engine.start()
+
+    assert not engine.running
