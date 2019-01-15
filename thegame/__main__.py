@@ -8,7 +8,7 @@ from thegame.game_src import TheGame
 def start_game():
     logging.getLogger().setLevel(logging.INFO)
 
-    game = TheGame(main_menu=BaseMenu(menu_image="main_menu.png"))
+    game = TheGame(main_menu=BaseMenu(menu_image="thegame/resources/main_menu.png"))
     game_engine = Engine(game)
     game_engine.start()
 

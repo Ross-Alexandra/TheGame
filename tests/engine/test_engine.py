@@ -43,7 +43,7 @@ def generate_keystroke_list(characters_pressed):
 @patch("thegame.engine.engine.pygame.display")
 def test_init_initializes_game_window(display_mock, init_mock):
 
-    Engine(Mock())
+    Engine(MagicMock())
 
     assert display_mock.set_caption.called
     assert display_mock.set_mode.called
@@ -59,7 +59,7 @@ def test_exception_in_main_loop_is_caught(main_loop_mock, logging_mock):
     with pytest.raises(ValueError):
         main_loop_mock.side_effect = ValueError
 
-        game = Engine(Mock())
+        game = Engine(MagicMock())
         game.start()
 
     assert logging_mock.exception.called
@@ -81,7 +81,7 @@ def test_no_events_gotten_doesnt_cause_an_error(event_get_mock):
             pass
         _game.running = False
 
-    game = Engine(Mock())
+    game = Engine(MagicMock())
     Thread(target=kill_game, args=(game, event_get_mock)).start()
 
     game.start()
@@ -96,7 +96,7 @@ def test_no_events_gotten_doesnt_cause_an_error(event_get_mock):
 def test_quit_event_causes_stopping_to_be_set_to_false(event_get_mock):
     event_get_mock.return_value = [DummyEvent(pygame.QUIT)]
 
-    game = Engine(Mock())
+    game = Engine(MagicMock())
     game.start()
 
     assert not game.running
@@ -111,7 +111,7 @@ def test_quit_event_causes_stopping_to_be_set_to_false(event_get_mock):
 def test_multiple_events_both_get_handled(event_get_mock, logging_mock):
     event_get_mock.return_value = [DummyEvent("cats"), DummyEvent(pygame.QUIT)]
 
-    game = Engine(Mock())
+    game = Engine(MagicMock())
     game.start()
 
     assert not game.running
@@ -130,7 +130,7 @@ def test_holding_down_character_only_counts_as_one_call(
 
     key_pressed_mock.return_value = generate_keystroke_list(["a"])
 
-    game = Engine(Mock())
+    game = Engine(MagicMock())
     game.start()
 
     keystroke_handle_mock.assert_called_once_with(["a"])
@@ -147,7 +147,7 @@ def test_mouse_button_down_causes_mouse_coordinates_to_be_recorded(event_get_moc
         DummyEvent(pygame.QUIT),
     ]
 
-    game = Engine(Mock())
+    game = Engine(MagicMock())
     game.start()
 
     assert game.mouse_down_pos == (0, 0)
@@ -164,7 +164,7 @@ def test_mouse_button_up_causes_mouse_down_pos_to_be_unset(event_get_mock):
         DummyEvent(pygame.QUIT),
     ]
 
-    game = Engine(Mock())
+    game = Engine(MagicMock())
     game.mouse_down_pos = (1, 2)
     game.start()
 
@@ -174,6 +174,7 @@ def test_mouse_button_up_causes_mouse_down_pos_to_be_unset(event_get_mock):
 @patch("thegame.engine.engine.pygame.init", Mock())
 @patch("thegame.engine.engine.pygame.display", Mock())
 @patch("thegame.engine.engine.pygame.key.get_pressed", MagicMock())
+@patch("thegame.engine.engine.pygame.image", MagicMock())
 @patch("thegame.engine.engine.pygame.mouse.get_pos", lambda: (0, 0))
 @patch("thegame.engine.engine.pygame.event.get")
 def test_mouse_button_up_calls_interaction_in_menu(event_get_mock):
@@ -184,7 +185,7 @@ def test_mouse_button_up_calls_interaction_in_menu(event_get_mock):
     ]
 
     mock_interaction = Mock()
-    menu = BaseMenu(Mock())
+    menu = BaseMenu(MagicMock())
     menu.register_interactive_zone(0, 0, 0, 0, mock_interaction)
     game = BaseGame(menu)
     engine = Engine(game)
@@ -197,6 +198,7 @@ def test_mouse_button_up_calls_interaction_in_menu(event_get_mock):
 @patch("thegame.engine.engine.pygame.init", Mock())
 @patch("thegame.engine.engine.pygame.display", Mock())
 @patch("thegame.engine.engine.pygame.event.get", MagicMock())
+@patch("thegame.engine.engine.pygame.image", MagicMock())
 @patch("thegame.engine.engine.pygame.key.get_pressed")
 @pytest.mark.parametrize(
     "keystroke_pattern, interaction_index",
@@ -214,7 +216,7 @@ def test_arrow_keys_can_be_used_to_interact_with_a_menu(
     keypress_mock.side_effect = generate_keypress_pattern(keystroke_pattern)
 
     mock_interaction = Mock()
-    menu = BaseMenu(Mock())
+    menu = BaseMenu(MagicMock())
 
     menu.register_interactive_zone(
         0, 0, 0, 0, Mock() if interaction_index == 1 else mock_interaction
@@ -249,7 +251,7 @@ def test_handle_event_raises_exception_causes_game_to_stop(
 
     event_get_mock.return_value = [DummyEvent(pygame.MOUSEBUTTONDOWN)]
 
-    engine = Engine(Mock())
+    engine = Engine(MagicMock())
     event_handle_mock.side_effect = Mock(spec=ValueError)
 
     engine.start()
@@ -279,7 +281,7 @@ def test_held_keys_are_not_handled_as_multiple_keystrokes(
         keystroke_pattern, convert_to_keystroke=False
     )
 
-    engine = Engine(Mock())
+    engine = Engine(MagicMock())
 
     try:
         engine.start()

@@ -1,5 +1,5 @@
 """ A module containing basic utilities used in multiple test files."""
-from unittest.mock import Mock
+from unittest.mock import MagicMock, patch
 
 import thegame.engine as engine
 
@@ -14,12 +14,13 @@ class DummyEvent:
         self.type = event_type
 
 
+@patch("pygame.image", MagicMock())
 def get_base_menu():
     """ Get an initialized menu. """
 
     # TODO: Once actual image loading has been implemented
     # this mock should probably have some return values.
-    return engine.BaseMenu(Mock())
+    return engine.BaseMenu(MagicMock())
 
 
 def generate_sheet(data_is_valid, contents_are_valid=True):

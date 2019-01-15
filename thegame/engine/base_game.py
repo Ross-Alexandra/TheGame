@@ -12,12 +12,21 @@ class BaseGame:
         main_menu: BaseMenu = None,
         initial_map: Map = None,
         initial_map_name="Initial Map",
+        screen_width: int = 600,
+        screen_height: int = 600,
+        base_sprite_width: int = 20,
+        base_sprite_height: int = 20,
     ):
 
         if main_menu is None and initial_map is None:
             raise SyntaxError(
                 "One of main_menu or initial_map must be specified to initialize a game."
             )
+
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.base_sprite_width = base_sprite_width
+        self.base_sprite_height = base_sprite_height
 
         # Setup the active map and menu. Each of th
         self.active_menu = main_menu

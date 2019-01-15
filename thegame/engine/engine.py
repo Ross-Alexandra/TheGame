@@ -9,8 +9,8 @@ from .base_menu import BaseMenu
 
 class Engine:
     def __init__(self, game: BaseGame):
-        self.width = 240
-        self.height = 180
+        self.width = game.screen_width
+        self.height = game.screen_height
         self.size = self.width, self.height
         self.running = False
         self.mouse_down_pos = None
@@ -18,7 +18,7 @@ class Engine:
 
         pygame.init()
         pygame.display.set_caption("TheGame")
-        pygame.display.set_mode(self.size)
+        self.display = pygame.display.set_mode(self.size)
 
     def start(self):
         self.running = True
@@ -39,10 +39,13 @@ class Engine:
 
         previous_pressed_keys = None
         logging.info("main loop started.")
+        game_clock = pygame.time.Clock()
+        game_sprites = pygame.sprite.Group()
 
         while self.running:
+
             # TODO: Attempt moving the keystroke logic into
-            #       the event hanlding logic under both
+            #       the event handling logic under both
             #       keypress and keyrelease events. This
             #       might deal with detecting holds
             #       auto-magically.
@@ -72,33 +75,57 @@ class Engine:
             # Handle events if any have come in.
             if number_of_events > 0:
 
-                # Each event should be independent of the other,
-                # thus we can process each one as if the others
-                # didn't happen.
-                event_pool = ThreadPool(processes=number_of_events)
+                self._schedule_events(events=events, number_of_events=number_of_events)
 
-                exception_check = []
-                for event in events:
-                    if self.running:
-                        exception_check.append(
-                            (
-                                event_pool.apply_async(
-                                    self._handle_event, args=(event,)
-                                ),
-                                event,
-                            )
-                        )
+            # TODO: Find a more efficient method of this.
+            #   clearing then re-adding all the sprites from
+            #   the group seems inefficient.
+            game_sprites.empty()
 
-                for possible_exception, event in exception_check:
-                    try:
-                        possible_exception.get()
-                    except Exception as e:
-                        self.running = False
-                        logging.exception(
-                            f"Caught exception while handling "
-                            f"'{pygame.event.event_name(event.type)}' event: '{e}'."
-                        )
-                        break
+            # Discover which portion of the screen needs to be drawn
+            if self.context.active_menu is not None:
+                game_sprites.add(self.context.active_menu.menu_image)
+            else:
+                sprites = [
+                    game_object.sprite
+                    for object_list in self.context.active_screen.tile_sheets
+                    for game_object in object_list
+                    if game_object is not None
+                ]
+                for sprite in sprites:
+                    game_sprites.add(sprite)
+
+            game_sprites.draw(self.display)
+
+            # TODO: In conjunction with the above todo, a more efficient way of drawing should be found.
+            pygame.display.flip()
+
+            # Run at 60fps
+            game_clock.tick(60)
+
+    def _schedule_events(self, events, number_of_events):
+        # Each event should be independent of the other,
+        # thus we can process each one as if the others
+        # didn't happen.
+        event_pool = ThreadPool(processes=number_of_events)
+
+        exception_check = []
+        for event in events:
+            if self.running:
+                exception_check.append(
+                    (event_pool.apply_async(self._handle_event, args=(event,)), event)
+                )
+
+        for possible_exception, event in exception_check:
+            try:
+                possible_exception.get()
+            except Exception as e:
+                self.running = False
+                logging.exception(
+                    f"Caught exception while handling "
+                    f"'{pygame.event.event_name(event.type)}' event: '{e}'."
+                )
+                break
 
     def _handle_event(self, event):
         logging.debug(f"Got event of type {pygame.event.event_name(event.type)}")

@@ -1,5 +1,7 @@
 import logging
 
+import pygame
+
 
 class BaseMenu:
     """ A base class for defining the behavior of a menu in a game.
@@ -15,7 +17,7 @@ class BaseMenu:
     INTERACTION_INDEX = 4
 
     def __init__(self, menu_image):
-        self.menu_image = menu_image
+        self.menu_image = pygame.image.load(menu_image).convert_alpha()
         self.focused_zone = None
         self._interactive_zones = []
 
