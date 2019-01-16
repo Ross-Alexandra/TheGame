@@ -16,8 +16,12 @@ class BaseMenu:
     FINAL_Y_POS_INDEX = 3
     INTERACTION_INDEX = 4
 
-    def __init__(self, menu_image):
-        self.menu_image = pygame.image.load(menu_image).convert_alpha()
+    def __init__(self, menu_image_location):
+        self.menu_image_location = menu_image_location
+
+        # Menu image will be populated by the engine once it has been started, and
+        # this menu is made active.
+        self.menu_image = None
         self.focused_zone = None
         self._interactive_zones = []
 

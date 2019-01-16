@@ -9,18 +9,26 @@ from .base_menu import BaseMenu
 
 class Engine:
     def __init__(self, game: BaseGame):
+
+        self.running = False
+
+        self.display = None
+        self.context = game
         self.width = game.screen_width
         self.height = game.screen_height
         self.size = self.width, self.height
-        self.running = False
         self.mouse_down_pos = None
-        self.context = game
 
         pygame.init()
+
+    def start(self):
+
         pygame.display.set_caption("TheGame")
         self.display = pygame.display.set_mode(self.size)
 
-    def start(self):
+        self._load_map_sprites()
+        self._load_menu_sprites()
+
         self.running = True
         try:
             logging.info("Starting engine.")
@@ -84,7 +92,8 @@ class Engine:
 
             # Discover which portion of the screen needs to be drawn
             if self.context.active_menu is not None:
-                game_sprites.add(self.context.active_menu.menu_image)
+                menu_sprite = self.context.active_menu.menu_image
+                game_sprites.add(menu_sprite)
             else:
                 sprites = [
                     game_object.sprite
@@ -102,6 +111,16 @@ class Engine:
 
             # Run at 60fps
             game_clock.tick(60)
+
+    def _load_map_sprites(self):
+        pass
+
+    def _load_menu_sprites(self):
+        for menu in self.context.menus.values():
+            sprite = pygame.sprite.Sprite()
+            sprite.image = pygame.image.load(menu.menu_image_location).convert_alpha()
+            sprite.rect = sprite.image.get_rect()
+            menu.menu_image = sprite
 
     def _schedule_events(self, events, number_of_events):
         # Each event should be independent of the other,

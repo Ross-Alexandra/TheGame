@@ -37,7 +37,9 @@ class BaseGame:
         # Create a dictionary of the maps that will be used in the game
         if initial_map:
             self.maps = {initial_map_name: initial_map}
+            self.menus = {}
         else:
+            self.menus = {"main menu": main_menu}
             self.maps = {}
 
     def register_map(self, map_name: str, new_map: Map):

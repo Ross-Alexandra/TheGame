@@ -41,9 +41,11 @@ def generate_keystroke_list(characters_pressed):
 
 @patch("thegame.engine.engine.pygame.init")
 @patch("thegame.engine.engine.pygame.display")
-def test_init_initializes_game_window(display_mock, init_mock):
+@patch("thegame.engine.engine.pygame.quit", Mock())
+@patch("thegame.engine.engine.Engine._main_loop", Mock())
+def test_engine_start_initializes_game_window(display_mock, init_mock):
 
-    Engine(MagicMock())
+    Engine(MagicMock()).start()
 
     assert display_mock.set_caption.called
     assert display_mock.set_mode.called
