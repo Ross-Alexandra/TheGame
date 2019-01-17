@@ -1,4 +1,5 @@
 import logging
+import pprint
 from multiprocessing.pool import ThreadPool
 
 import pygame
@@ -26,8 +27,14 @@ class Engine:
         pygame.display.set_caption("TheGame")
         self.display = pygame.display.set_mode(self.size)
 
+        # Load in the game and load the active map if not a menu.
         self._load_map_sprites()
         self._load_menu_sprites()
+
+        # Load the map if the game was not initialized with a
+        # main menu.
+        if self.context.active_menu is None:
+            self.context.load_active_map()
 
         self.running = True
         try:
@@ -95,13 +102,32 @@ class Engine:
                 menu_sprite = self.context.active_menu.menu_image
                 game_sprites.add(menu_sprite)
             else:
-                sprites = [
-                    game_object.sprite
-                    for object_list in self.context.active_screen.tile_sheets
-                    for game_object in object_list
-                    if game_object is not None
-                ]
-                for sprite in sprites:
+                onscreen_sprites = []
+                fov_tile_sheet = self.context.camera.get_camera_fov(
+                    self.context.active_screen
+                )
+                logging.debug(
+                    f"Got the following fov_tile_sheet: {pprint.pformat(fov_tile_sheet, indent=4)}"
+                )
+
+                # Currently, this is done with (4 * camera_width * camera_height) loops.
+                # the only way to reduce this is to not loop over rows full of Nones, but
+                # this check isn't worth the gain.
+                # Updates each sprites' x and y position.
+                for layer in fov_tile_sheet:
+                    for row_index, row in enumerate(layer):
+                        for cell_index, cell in enumerate(row):
+                            if cell is not None:
+                                logging.debug(
+                                    f"{cell_index}: Setting the position of a {type(cell).__name__} on the screen."
+                                )
+                                cell.set_sprite_position(
+                                    cell_index * self.context.base_sprite_width,
+                                    row_index * self.context.base_sprite_height,
+                                )
+                                onscreen_sprites.append(cell.get_sprite())
+
+                for sprite in onscreen_sprites:
                     game_sprites.add(sprite)
 
             game_sprites.draw(self.display)
@@ -113,7 +139,22 @@ class Engine:
             game_clock.tick(60)
 
     def _load_map_sprites(self):
-        pass
+
+        game_object_list_set = set()
+
+        # TODO: This is really ugly, and probably not optimal
+        #       This should be re-looked at to be improved.
+        for game_map in self.context.maps.values():
+            for layer in game_map.tile_sheets:
+                for row in layer:
+                    for game_object in row:
+                        if game_object is not None:
+                            game_object_list_set.add(game_object.sprite_location)
+
+        for game_object_location in game_object_list_set:
+            image = pygame.image.load(game_object_location).convert_alpha()
+
+            self.context.object_images[game_object_location] = image
 
     def _load_menu_sprites(self):
         for menu in self.context.menus.values():
