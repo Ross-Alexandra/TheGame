@@ -1,11 +1,12 @@
 class GameObject:
     """ An object that will be used to fill the objects sheet of a game."""
 
-    def __init__(self, sprite_location: str, animation: str = None):
+    def __init__(self, sprite_location: str, animation: str = None, name: str = None):
 
         self.sprite_location = sprite_location
         self.animation = animation
         self._loaded_sprite = None
+        self.name = name
 
     def clone(self):
         clone = GameObject(
@@ -37,3 +38,9 @@ class GameObject:
 
     def deregister_loaded_sprite(self):
         self._loaded_sprite = None
+
+    def __str__(self):
+        if self.name:
+            return type(self).__name__ + f": {self.name}"
+        else:
+            return type(self).__name__

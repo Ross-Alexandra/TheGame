@@ -3,49 +3,8 @@ import logging
 import pygame
 
 from .base_menu import BaseMenu
+from .camera import Camera
 from .map import Map
-
-
-class Camera:
-    """ A Camera class for dealing with the game camera."""
-
-    def __init__(self, camera_width, camera_height, camera_x, camera_y):
-        """ In order to have a center of the screen, camera_width and camera_height
-            act as if they are the next highest odd number (presuming they're even.)
-            If its odd, the value doesn't change."""
-        self.camera_width = camera_width
-        self.camera_height = camera_height
-        self.camera_x = camera_x
-        self.camera_y = camera_y
-
-    def get_camera_fov(self, game_map: Map):
-        #  x x x x x
-        #      ^
-        # camera_x = 2
-        # camera_width = 3
-        # 1 - (3 // 2) = 2 - 1 = 1
-        # 1 + (3 // 2) = 2 + 1 = 3
-        #
-        leftmost_sprite = self.camera_x - (self.camera_width // 2)
-        rightmost_sprite = self.camera_x + (self.camera_width // 2)
-
-        topmost_sprite = self.camera_y - (self.camera_height // 2)
-        bottommost_sprite = self.camera_y + (self.camera_height // 2)
-
-        # TODO: There may be a better way to do this.
-        # Current functionality:
-        #   Take each layer, and break it into rows. Assemble a list of those rows in the
-        #   range from topmost to bottom most, and slice those rows to only include between
-        #   leftmost and rightmost.
-        fov_tile_sheet = []
-        for tile_sheet in game_map.tile_sheets:
-            shrunk_tile_sheet = []
-            for row in tile_sheet[topmost_sprite : bottommost_sprite + 1]:
-                shrunk_tile_sheet.append(row[leftmost_sprite : rightmost_sprite + 1])
-
-            fov_tile_sheet.append(shrunk_tile_sheet)
-
-        return fov_tile_sheet
 
 
 class BaseGame:
