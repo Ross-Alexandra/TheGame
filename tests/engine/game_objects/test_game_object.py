@@ -79,3 +79,17 @@ def test_set_sprite_position_on_spriteless_object_throws_value_error():
 
     with pytest.raises(ValueError):
         go.set_sprite_position(pos_x=5, pos_y=4)
+
+
+def test_name_in_game_object_string_when_set():
+
+    go = GameObject("sprite.png", name="Bob")
+
+    assert "Bob" in str(go)
+
+
+def test_game_object_type_name_in_string():
+
+    go = GameObject("spring.png")
+
+    assert type(go).__name__ in str(go)
