@@ -86,13 +86,13 @@ class BaseGame:
             for row_index, row in enumerate(sheet):
                 for cell_index, cell in enumerate(row):
                     if cell is not None:
-                        sprite = pygame.sprite.Sprite()
-                        sprite.image = self.object_images[cell]
-
                         cell.deregister_loaded_sprite()
 
     def register_map(self, map_name: str, new_map: Map):
         self.maps[map_name] = new_map
+
+    def register_menu(self, menu_name: str, new_menu: BaseMenu):
+        self.menus[menu_name] = new_menu
 
     def change_map(self, map_name):
         new_map = self.maps.get(map_name, None)
@@ -106,7 +106,7 @@ class BaseGame:
         self.active_menu = None
         self.load_active_map()
 
-    def open_meu(self, menu_name):
+    def open_menu(self, menu_name):
         new_menu = self.menus.get(menu_name, None)
 
         if new_menu is None:
@@ -115,7 +115,8 @@ class BaseGame:
         if self.active_menu is None:
             self.unload_active_map()
 
-        self.active_menu = self.active_screen = new_menu
+        self.active_menu = new_menu
+        self.active_screen = new_menu
 
     @staticmethod
     def shutdown():
