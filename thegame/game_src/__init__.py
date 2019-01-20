@@ -1,0 +1,1 @@
+from .thegame import TheGame
