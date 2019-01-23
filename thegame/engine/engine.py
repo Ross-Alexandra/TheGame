@@ -204,7 +204,7 @@ class Engine:
 
             logging.info(f"Mouse button released at position ({final_x}, {final_y})")
 
-            # If the current active screen is a menu, then call attempt to call and
+            # If the current active screen is a menu, then attempt to call an
             # interactive zone (only works if one has been registered where the click happened.)
             if isinstance(self.context.active_screen, BaseMenu):
                 self.context.active_menu.call_interactive_zone_by_click(
