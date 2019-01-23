@@ -4,8 +4,14 @@ from unittest.mock import MagicMock, Mock, call, patch
 import pygame
 import pytest
 
-from tests.test_utils import DOWN_ARROW_CHAR, UP_ARROW_CHAR, DummyEvent
-from thegame.engine import BaseGame, BaseMenu, Engine
+from tests.test_utils import (
+    DOWN_ARROW_CHAR,
+    UP_ARROW_CHAR,
+    DummyEvent,
+    generate_valid_map,
+)
+from thegame.engine import BaseGame, BaseMenu, Engine, Map
+from thegame.engine.game_objects import GameObject
 
 
 def generate_keypress_pattern(characters, convert_to_keystroke=True):
@@ -315,3 +321,69 @@ def test_held_keys_are_not_handled_as_multiple_keystrokes(
             calls.append(current_presses_call)
 
     handle_keypress_mock.assert_has_calls(calls, any_order=True)
+
+
+@patch("thegame.engine.engine.pygame.init", Mock())
+@patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.key.get_pressed", MagicMock())
+@patch("thegame.engine.engine.Engine._handle_keystrokes", Mock())
+@patch("thegame.engine.engine.pygame.event.get")
+@patch("thegame.engine.base_game.BaseGame.load_active_map")
+def test_loading_a_game_with_no_menu_loads_the_active_map(
+    load_map_mock, event_get_mock
+):
+    event_get_mock.return_value = [DummyEvent(pygame.QUIT)]
+
+    game_map = generate_valid_map()
+    game = BaseGame(initial_map=game_map)
+    engine = Engine(game)
+
+    engine.start()
+
+    assert load_map_mock.called
+
+
+@patch("thegame.engine.engine.pygame.init", Mock())
+@patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.key.get_pressed", MagicMock())
+@patch("thegame.engine.engine.Engine._handle_keystrokes", Mock())
+@patch("pygame.image.load")
+@patch("thegame.engine.engine.pygame.event.get")
+@patch("pygame.sprite.Group.add")
+def test_onscreen_sprites_are_correctly_added(
+    sprite_group_mock, event_get_mock, image_load_mock
+):
+    event_get_mock.return_value = [DummyEvent(pygame.QUIT)]
+
+    sprite_mock = Mock(name="sprite_mock")
+    convert_alpha_mock = Mock()
+    convert_alpha_mock.convert_alpha.return_value = sprite_mock
+
+    image_load_mock.return_value = convert_alpha_mock
+
+    go1 = GameObject("sprite.png")
+    go2 = GameObject("sprite2.png")
+    go3 = GameObject("sprite3.png")
+
+    sheet = [
+        [go1.clone(), go2.clone(), go3.clone()],
+        [go3.clone(), go1.clone(), go2.clone()],
+        [go2.clone(), go3.clone(), go1.clone()],
+    ]
+
+    game_map = Map(list(sheet), list(sheet), list(sheet), list(sheet), validate=False)
+
+    game = BaseGame(
+        initial_map=game_map, camera_width=3, camera_height=3, camera_x=1, camera_y=1
+    )
+    engine = Engine(game)
+    engine.start()
+
+    call_args = sprite_group_mock.call_args
+
+    print(call_args[0][0].image)
+
+    # Ignore empty calls.
+    assert all(
+        call_arg[0].image is sprite_mock for call_arg in call_args if len(call_arg) >= 1
+    )
