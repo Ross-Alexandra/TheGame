@@ -381,8 +381,6 @@ def test_onscreen_sprites_are_correctly_added(
 
     call_args = sprite_group_mock.call_args
 
-    print(call_args[0][0].image)
-
     # Ignore empty calls.
     assert all(
         call_arg[0].image is sprite_mock for call_arg in call_args if len(call_arg) >= 1
