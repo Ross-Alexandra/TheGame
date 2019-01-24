@@ -30,7 +30,7 @@ def test_clone_produces_object_with_same_sprite_info():
     assert clone.animation == go.animation
 
 
-def test_the_registered_sprite_can_be_loaded_and_unloaded():
+def test_the_registered_sprite_can_be_loaded():
 
     go = GameObject("sprite.png")
     sprite_mock = Mock()
@@ -38,6 +38,12 @@ def test_the_registered_sprite_can_be_loaded_and_unloaded():
 
     assert go._loaded_sprite is sprite_mock
 
+
+def test_the_registered_spite_can_be_unloded():
+
+    go = GameObject("sprite.png")
+    sprite_mock = Mock()
+    go.register_loaded_sprite(sprite_mock)
     go.deregister_loaded_sprite()
 
     assert go._loaded_sprite is None
