@@ -1,4 +1,5 @@
 import logging
+import pprint
 from multiprocessing.pool import ThreadPool
 
 import pygame
@@ -9,18 +10,32 @@ from .base_menu import BaseMenu
 
 class Engine:
     def __init__(self, game: BaseGame):
-        self.width = 240
-        self.height = 180
-        self.size = self.width, self.height
+
         self.running = False
-        self.mouse_down_pos = None
+
+        self.display = None
         self.context = game
+        self.width = game.screen_width
+        self.height = game.screen_height
+        self.size = self.width, self.height
+        self.mouse_down_pos = None
 
         pygame.init()
-        pygame.display.set_caption("TheGame")
-        pygame.display.set_mode(self.size)
 
     def start(self):
+
+        pygame.display.set_caption(self.context.name)
+        self.display = pygame.display.set_mode(self.size)
+
+        # Load in the game and load the active map if not a menu.
+        self._load_map_sprites()
+        self._load_menu_sprites()
+
+        # Load the map if the game was not initialized with a
+        # main menu.
+        if self.context.active_menu is None:
+            self.context.load_active_map()
+
         self.running = True
         try:
             logging.info("Starting engine.")
@@ -39,10 +54,13 @@ class Engine:
 
         previous_pressed_keys = None
         logging.info("main loop started.")
+        game_clock = pygame.time.Clock()
+        game_sprites = pygame.sprite.Group()
 
         while self.running:
+
             # TODO: Attempt moving the keystroke logic into
-            #       the event hanlding logic under both
+            #       the event handling logic under both
             #       keypress and keyrelease events. This
             #       might deal with detecting holds
             #       auto-magically.
@@ -72,33 +90,115 @@ class Engine:
             # Handle events if any have come in.
             if number_of_events > 0:
 
-                # Each event should be independent of the other,
-                # thus we can process each one as if the others
-                # didn't happen.
-                event_pool = ThreadPool(processes=number_of_events)
+                self._schedule_events(events=events, number_of_events=number_of_events)
 
-                exception_check = []
-                for event in events:
-                    if self.running:
-                        exception_check.append(
-                            (
-                                event_pool.apply_async(
-                                    self._handle_event, args=(event,)
-                                ),
-                                event,
-                            )
-                        )
+            # TODO: Find a more efficient method of this.
+            #   clearing then re-adding all the sprites from
+            #   the group seems inefficient.
+            game_sprites.empty()
 
-                for possible_exception, event in exception_check:
-                    try:
-                        possible_exception.get()
-                    except Exception as e:
-                        self.running = False
-                        logging.exception(
-                            f"Caught exception while handling "
-                            f"'{pygame.event.event_name(event.type)}' event: '{e}'."
-                        )
-                        break
+            # Discover which portion of the screen needs to be drawn
+            if self.context.active_menu is not None:
+                menu_sprite = self.context.active_menu.menu_image
+                game_sprites.add(menu_sprite)
+            else:
+                onscreen_sprites = []
+                fov_tile_sheet = self.context.camera.get_camera_fov(
+                    self.context.active_screen
+                )
+                logging.debug(
+                    f"Got the following fov_tile_sheet: {pprint.pformat(fov_tile_sheet, indent=4)}"
+                )
+
+                # Currently, this is done with (4 * camera_width * camera_height) loops.
+                # the only way to reduce this is to not loop over rows full of Nones, but
+                # this check isn't worth the gain.
+                # Updates each sprites' x and y position.
+                for layer in fov_tile_sheet[::-1]:
+                    for row_index, row in enumerate(layer):
+                        for cell_index, cell in enumerate(row):
+                            if cell is not None:
+                                logging.debug(
+                                    f"{cell_index}: Setting the position of a {type(cell).__name__} on the screen."
+                                )
+                                cell.set_sprite_position(
+                                    cell_index * self.context.base_sprite_width,
+                                    row_index * self.context.base_sprite_height,
+                                )
+                                onscreen_sprites.append(cell.get_sprite())
+
+                for sprite in onscreen_sprites:
+                    game_sprites.add(sprite)
+
+            game_sprites.draw(self.display)
+
+            # TODO: In conjunction with the above todo, a more efficient way of drawing should be found.
+            pygame.display.flip()
+
+            # Run at 60fps
+            game_clock.tick(60)
+
+    def _load_map_sprites(self):
+
+        game_object_list_set = set()
+
+        # TODO: This is really ugly, and probably not optimal
+        #       This should be re-looked at to be improved.
+        for game_map in self.context.maps.values():
+            for layer in game_map.tile_sheets:
+                for row in layer:
+                    for game_object in row:
+                        if game_object is not None:
+                            game_object_list_set.add(game_object.sprite_location)
+
+        for game_object_location in game_object_list_set:
+            image = pygame.image.load(game_object_location).convert_alpha()
+
+            self.context.object_images[game_object_location] = image
+
+    def _load_menu_sprites(self):
+        for menu in self.context.menus.values():
+            sprite = pygame.sprite.Sprite()
+            sprite.image = pygame.image.load(menu.menu_image_location).convert_alpha()
+            sprite.rect = sprite.image.get_rect()
+            menu.menu_image = sprite
+
+    def _schedule_events(self, events, number_of_events):
+        # Each event should be independent of the other,
+        # thus we can process each one as if the others
+        # didn't happen.
+        event_pool = ThreadPool(processes=number_of_events)
+
+        # Because the events are running in a separate thread, an
+        # exception thrown by them is hidden in the ThreadPool.
+        # In order to tell if an exception occurred in any of the event
+        # handlers, we store a future to each call in exception_check,
+        # and once all of the events have been scheduled, we get a value
+        # from these futures. If an exception was thrown, this get call
+        # will also throw it.
+        # TODO: Find a better way to do this, currently we only have
+        #       a concurrency gain from doing these in separate threads,
+        #       this method still wont return until the longest of the
+        #       threads has finished though. An ideal solution would allow
+        #       for exception checking, but return from this method *before*
+        #       the event handler has finished running.
+        exception_check = []
+        for event in events:
+            if self.running:
+                exception_check.append(
+                    (event_pool.apply_async(self._handle_event, args=(event,)), event)
+                )
+
+        for possible_exception, event in exception_check:
+            try:
+                possible_exception.get()
+            except Exception as e:
+                self.running = False
+                logging.exception(
+                    f"Caught exception while handling "
+                    f"'{pygame.event.event_name(event.type)}' event: '{e}'."
+                )
+                break
 
     def _handle_event(self, event):
         logging.debug(f"Got event of type {pygame.event.event_name(event.type)}")

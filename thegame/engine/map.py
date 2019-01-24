@@ -31,14 +31,22 @@ class Map:
     WARP_ZONE_FINAL_Y_POSITION = 3
     WARP_ZONE_LOCATION = 4
 
-    def __init__(self, foreground_sheet, path_sheet, background_sheet, character_sheet):
+    def __init__(
+        self,
+        foreground_sheet,
+        path_sheet,
+        background_sheet,
+        character_sheet,
+        validate=True,
+    ):
 
         self.foreground_sheet = foreground_sheet
         self.path_sheet = path_sheet
         self.background_sheet = background_sheet
         self.character_sheet = character_sheet
 
-        self._validate()
+        if validate:
+            self._validate()
 
         self._warp_zones = []
 
@@ -95,6 +103,7 @@ class Map:
             ):
                 raise self.InvalidObjectInSheetException(
                     f"Object not of type GameObject or None found in background sheet."
+                    f" Either correct this issue, or turn validation off."
                 )
 
             # Check that all the objects in the character sheet are GameObjects or None.
@@ -105,6 +114,7 @@ class Map:
             ):
                 raise self.InvalidObjectInSheetException(
                     f"Object not of type GameObject or None found in character sheet."
+                    f" Either correct this issue, or turn validation off."
                 )
         except TypeError:
             raise ValueError("All sheets must be 2D, ie an iterable of an iterable.")
