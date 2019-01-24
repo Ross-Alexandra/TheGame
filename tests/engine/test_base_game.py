@@ -78,11 +78,12 @@ def test_change_map_to_invalid_map_throws_exception():
 @patch("pygame.event.post")
 def test_shutdown_stops_the_game(event_post_mock):
     base_map = generate_valid_map()
+    quit_event = pygame.event.Event(pygame.QUIT, dict=None)
 
     game = BaseGame(initial_map=base_map)
     game.shutdown()
 
-    event_post_mock.assert_called_with(pygame.event.Event(pygame.QUIT, dict=None))
+    event_post_mock.assert_called_with(quit_event)
 
 
 def test_open_menu_with_invalid_menu_name_raises_value_error():
