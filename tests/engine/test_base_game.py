@@ -150,6 +150,8 @@ def test_load_active_maps_sets_game_object_sprites():
     game = BaseGame(initial_map=base_map)
     game.object_images["sprite.png"] = sprite_mock
 
+    # Usually the engine handles calling this, but there is no
+    # engine running so we need to call this manually.
     game.load_active_map()
 
     assert base_sheet[0][0].get_sprite().image is sprite_mock
