@@ -10,6 +10,7 @@ A basic 2D game with no current ideas for story, setting, etc.
 To install the requirements for this project, please run
 ```
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 This project also uses pre-commit, this means after installing, you should run:
@@ -17,3 +18,19 @@ This project also uses pre-commit, this means after installing, you should run:
 pre-commit install
 ```
 This should cause the pre-commit hooks to run.
+
+# Testing the game
+This project uses pytest as its unit test manager. In order to run the unit tests, please run
+```
+pytest
+```
+
+This should manage running all of the tests.
+
+# Running the game
+Because this project is designed with modules, it must be run as
+```
+python -m thegame
+```
+
+Running this from the root directory will cause it to run the game.
