@@ -34,14 +34,14 @@ def start_game():
         )
 
         game.active_menu.register_interactive_zone(
-            173, 228, 334, 303, main_menu_interaction
+            173, 228, 334, 303, exit_button_interaction
         )
 
     game_engine = Engine(game)
     game_engine.start()
 
 
-def main_menu_interaction(game_context, *args, **kwargs):
+def exit_button_interaction(game_context, *args, **kwargs):
     game_context.shutdown()
 
 

@@ -62,7 +62,7 @@ def test_get_sprite_on_spriteless_object_throws_value_error():
 
     go = GameObject("sprite.png")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError):
         go.get_sprite()
 
 
@@ -83,7 +83,7 @@ def test_set_sprite_position_on_spriteless_object_throws_value_error():
 
     go = GameObject("sprite.png")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError):
         go.set_sprite_position(pos_x=5, pos_y=4)
 
 

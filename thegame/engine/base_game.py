@@ -17,6 +17,7 @@ class BaseGame:
         main_menu: BaseMenu = None,
         initial_map: Map = None,
         initial_map_name="Initial Map",
+        game_name: str = "TheGame",
         screen_width: int = 600,
         screen_height: int = 600,
         base_sprite_width: int = 30,
@@ -32,6 +33,7 @@ class BaseGame:
                 "One of main_menu or initial_map must be specified to initialize a game."
             )
 
+        self.name = game_name
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.base_sprite_width = base_sprite_width

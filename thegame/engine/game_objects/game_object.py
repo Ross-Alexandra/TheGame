@@ -20,7 +20,7 @@ class GameObject:
 
     def set_sprite_position(self, pos_x, pos_y):
         if self._loaded_sprite is None:
-            raise ValueError(
+            raise AttributeError(
                 f"Tried to set {type(self).__name__}'s position without registering a loaded sprite."
             )
 
@@ -30,7 +30,7 @@ class GameObject:
 
     def get_sprite(self):
         if self._loaded_sprite is None:
-            raise ValueError(
+            raise AttributeError(
                 f"Tried to get {type(self).__name__}'s sprite without registering it."
             )
 

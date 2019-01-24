@@ -24,7 +24,7 @@ class Engine:
 
     def start(self):
 
-        pygame.display.set_caption("TheGame")
+        pygame.display.set_caption(self.context.name)
         self.display = pygame.display.set_mode(self.size)
 
         # Load in the game and load the active map if not a menu.
@@ -169,6 +169,19 @@ class Engine:
         # didn't happen.
         event_pool = ThreadPool(processes=number_of_events)
 
+        # Because the events are running in a separate thread, an
+        # exception thrown by them is hidden in the ThreadPool.
+        # In order to tell if an exception occurred in any of the event
+        # handlers, we store a future to each call in exception_check,
+        # and once all of the events have been scheduled, we get a value
+        # from these futures. If an exception was thrown, this get call
+        # will also throw it.
+        # TODO: Find a better way to do this, currently we only have
+        #       a concurrency gain from doing these in separate threads,
+        #       this method still wont return until the longest of the
+        #       threads has finished though. An ideal solution would allow
+        #       for exception checking, but return from this method *before*
+        #       the event handler has finished running.
         exception_check = []
         for event in events:
             if self.running:

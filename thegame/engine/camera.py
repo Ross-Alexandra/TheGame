@@ -37,6 +37,9 @@ class Camera:
         #   Take each layer, and break it into rows. Assemble a list of those rows in the
         #   range from topmost to bottom most, and slice those rows to only include between
         #   leftmost and rightmost.
+        #   Further, if the fov of the camera would put a portion of the camera outside
+        #   of the map's bounds (think a negative leftmost_sprite) then we return Nones
+        #   for any outside position.
         fov_tile_sheet = []
         for tile_sheet in game_map.tile_sheets:
 
