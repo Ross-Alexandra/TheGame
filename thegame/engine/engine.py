@@ -114,7 +114,7 @@ class Engine:
                 # the only way to reduce this is to not loop over rows full of Nones, but
                 # this check isn't worth the gain.
                 # Updates each sprites' x and y position.
-                for layer in fov_tile_sheet:
+                for layer in fov_tile_sheet[::-1]:
                     for row_index, row in enumerate(layer):
                         for cell_index, cell in enumerate(row):
                             if cell is not None:

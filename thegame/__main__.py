@@ -10,11 +10,13 @@ def start_game():
     logging.getLogger().setLevel(logging.INFO)
 
     if len(sys.argv) > 1 and sys.argv[1] == "-m":
-        obj = GameObject(sprite_location="thegame/resources/box.png")
+        test_obj_one = GameObject(sprite_location="thegame/resources/TestBoxOne.png")
+        test_obj_two = GameObject(sprite_location="thegame/resources/TestBoxTwo.png")
 
-        sheet = [[obj.clone() for _ in range(20)] for _ in range(20)]
+        top_sheet = [[test_obj_one.clone() for _ in range(20)] for _ in range(20)]
+        bottom_sheet = [[test_obj_two.clone() for _ in range(20)] for _ in range(20)]
         empty_sheet = [[None for _ in range(20)] for _ in range(20)]
-        main_map = Map(sheet, empty_sheet, empty_sheet, empty_sheet)
+        main_map = Map(top_sheet, empty_sheet, empty_sheet, bottom_sheet)
 
         game = TheGame(
             initial_map=main_map,
