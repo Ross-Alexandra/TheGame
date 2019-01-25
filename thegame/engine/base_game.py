@@ -72,6 +72,7 @@ class BaseGame:
             self.maps = {}
 
         self.object_images = {}
+        self.player_controlled_objects = {}
 
     def load_active_map(self):
         for sheet in self.active_screen.tile_sheets:
@@ -96,6 +97,12 @@ class BaseGame:
     def register_menu(self, menu_name: str, new_menu: BaseMenu):
         self.menus[menu_name] = new_menu
 
+    def register_player_controlled_object(self, player_controlled_object, pos_x, pos_y):
+        self.player_controlled_objects[player_controlled_object] = (pos_x, pos_y)
+
+    def clear_player_controlled_objects(self):
+        self.player_controlled_objects.clear()
+
     def change_map(self, map_name):
         new_map = self.maps.get(map_name, None)
 
@@ -103,9 +110,17 @@ class BaseGame:
             raise ValueError(f"No map registered with name '{map_name}'")
 
         self.unload_active_map()
+        self.clear_player_controlled_objects()
         # Set the active screen to the new map. This will close any menus.
         self.active_screen = new_map
         self.active_menu = None
+
+        # Setup the player controlled object dictionary.
+        for object_tuple in new_map.player_controlled_objects:
+            self.register_player_controlled_object(
+                object_tuple[0], object_tuple[1], object_tuple[2]
+            )
+
         self.load_active_map()
 
     def open_menu(self, menu_name):

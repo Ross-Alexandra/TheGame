@@ -1,4 +1,4 @@
-from thegame.engine.game_objects.game_object import GameObject
+from thegame.engine.game_objects import GameObject, PlayerControlledObject
 
 
 class Map:
@@ -70,6 +70,45 @@ class Map:
             self.path_sheet,
             self.background_sheet,
         )
+
+    @property
+    def player_controlled_objects(self):
+
+        player_controlled_objects = []
+
+        for sheet in self.tile_sheets:
+            for row_index, row in enumerate(sheet):
+                for cell_index, cell in enumerate(row):
+                    if isinstance(cell, PlayerControlledObject):
+                        player_controlled_objects.append((cell, cell_index, row_index))
+
+        return player_controlled_objects
+
+    def swap(self, tile_one: tuple, tile_two: tuple, sheet: int):
+        """ Swap two tiles.
+
+            Args:
+                tile_one(tuple): x,y of one of the tiles
+                tile_two(tuple): x,y of the other tile.
+                sheet(int): The sheet number that the swap is happening on.
+        """
+
+        if not 0 <= sheet <= 3:
+            raise ValueError(
+                f"Attempted to swap tiles on sheet level {sheet}, which is not a valid sheet. Please"
+                " swap on sheet [0-3]."
+            )
+
+        tile_one_x = tile_one[0]
+        tile_one_y = tile_one[1]
+        tile_two_x = tile_two[0]
+        tile_two_y = tile_two[1]
+
+        _ = self.tile_sheets[sheet][tile_one_x][tile_two_y]
+        self.tile_sheets[sheet][tile_one_x][tile_one_y] = self.tile_sheets[sheet][
+            tile_two_x
+        ][tile_two_y]
+        self.tile_sheets[sheet][tile_two_x][tile_two_y] = _
 
     def _validate(self):
         """ Validate that each sheet is valid, if its not, raise an appropriate exception. """
