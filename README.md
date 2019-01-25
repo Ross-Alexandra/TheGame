@@ -2,7 +2,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![codecov](https://codecov.io/gh/Ross-Alexandra/TheGame/branch/master/graph/badge.svg)](https://codecov.io/gh/Ross-Alexandra/TheGame)
 [![Maintainability](https://api.codeclimate.com/v1/badges/9650ffb60ccea8bfb4bc/maintainability)](https://codeclimate.com/github/Ross-Alexandra/TheGame/maintainability)
-
+[![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 # TheGame
 A basic 2D game with no current ideas for story, setting, etc.
 
