@@ -104,11 +104,11 @@ class Map:
         tile_two_x = tile_two[0]
         tile_two_y = tile_two[1]
 
-        _ = self.tile_sheets[sheet][tile_one_x][tile_two_y]
-        self.tile_sheets[sheet][tile_one_x][tile_one_y] = self.tile_sheets[sheet][
-            tile_two_x
-        ][tile_two_y]
-        self.tile_sheets[sheet][tile_two_x][tile_two_y] = _
+        first_tile = self.tile_sheets[sheet][tile_one_y][tile_one_x]
+        second_tile = self.tile_sheets[sheet][tile_two_y][tile_two_x]
+
+        self.tile_sheets[sheet][tile_one_y][tile_one_x] = second_tile
+        self.tile_sheets[sheet][tile_two_y][tile_two_x] = first_tile
 
     def _validate(self):
         """ Validate that each sheet is valid, if its not, raise an appropriate exception. """

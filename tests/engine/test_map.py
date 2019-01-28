@@ -2,6 +2,7 @@ import pytest
 
 from tests.test_utils import generate_sheet, generate_valid_map
 from thegame.engine import Map
+from thegame.engine.game_objects import PlayerControlledObject
 
 
 @pytest.mark.parametrize(
@@ -97,3 +98,34 @@ def test_registering_warp_zone_outside_warp_location_raises_exception():
     # Try to create a warp zone to 10, 10 in a 2x2 sheet.
     with pytest.raises(Map.InvalidWarpZoneLocationException):
         test_map.register_warp_zone(0, 0, test_map, 10, 10)
+
+
+def test_swap_swaps_two_tiles():
+
+    output_sheet = [[2, 1]]
+    test_map = Map([[1, 2]], [[1, 2]], [[1, 2]], [[1, 2]], validate=False)
+
+    test_map.swap((0, 0), (1, 0), Map.FOREGROUND_SHEET_INDEX)
+    test_map.swap((0, 0), (1, 0), Map.CHARACTER_SHEET_INDEX)
+    test_map.swap((0, 0), (1, 0), Map.PATH_SHEET_INDEX)
+    test_map.swap((0, 0), (1, 0), Map.BACKGROUND_SHEET_INDEX)
+
+    assert test_map.tile_sheets == (
+        list(output_sheet),
+        list(output_sheet),
+        list(output_sheet),
+        list(output_sheet),
+    )
+
+
+def test_player_controlled_objects_contains_all_player_controlled_objects_and_their_coordinates():
+    pco1 = PlayerControlledObject("sprite.png")
+    pco2 = PlayerControlledObject("sprite.png")
+
+    test_map = Map([[pco1, pco2]], [[1, 2]], [[1, 2]], [[1, 2]], validate=False)
+
+    player_controlled_objects = test_map.player_controlled_objects
+
+    assert (pco1, 0, 0) in player_controlled_objects
+    assert (pco2, 1, 0) in player_controlled_objects
+    assert len(player_controlled_objects) == 2
