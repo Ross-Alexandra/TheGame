@@ -5,7 +5,7 @@ import pytest
 
 from tests.test_utils import generate_valid_map, get_base_menu
 from thegame.engine import BaseGame, Map
-from thegame.engine.game_objects import GameObject
+from thegame.engine.game_objects import GameObject, PlayerControlledObject
 
 
 def test_creating_game_without_main_screen_or_menu_throws_error():
@@ -158,3 +158,78 @@ def test_load_active_maps_sets_game_object_sprites():
     assert base_sheet[0][1].get_sprite().image is sprite_mock
     assert base_sheet[1][0].get_sprite().image is sprite_mock
     assert base_sheet[1][1].get_sprite().image is sprite_mock
+
+
+def test_register_player_controlled_object_correctly_registers():
+    pco = PlayerControlledObject("sprite.txt")
+
+    game = BaseGame(initial_map=generate_valid_map())
+
+    game.register_player_controlled_object(pco, 1, 2)
+
+    assert game.player_controlled_objects[pco] == (1, 2)
+    assert len(game.player_controlled_objects) == 1
+
+
+@patch("pygame.sprite.Sprite", Mock())
+def test_change_map_loads_new_player_controlled_objects_and_unloads_previous_ones():
+
+    pco1 = PlayerControlledObject("sprite.png")
+    pco2 = PlayerControlledObject("sprite.png")
+    pco3 = PlayerControlledObject("sprite.png")
+    pco4 = PlayerControlledObject("sprite.png")
+
+    go_mock = Mock()
+    go_mock.sprite_location = "sprite.png"
+
+    test_map = Map(
+        [[pco1, pco2]],
+        [[go_mock, go_mock]],
+        [[go_mock, go_mock]],
+        [[go_mock, go_mock]],
+        validate=False,
+    )
+    alt_map = Map(
+        [[pco3, pco4]],
+        [[go_mock, go_mock]],
+        [[go_mock, go_mock]],
+        [[go_mock, go_mock]],
+        validate=False,
+    )
+
+    game = BaseGame(initial_map=test_map)
+    game.object_images["sprite.png"] = Mock()  # Setup a mock to load the image as.
+    game.register_map("alt", alt_map)
+
+    game.change_map("alt")
+
+    assert pco1 not in game.player_controlled_objects
+    assert pco2 not in game.player_controlled_objects
+    assert game.player_controlled_objects[pco3] == (0, 0)
+    assert game.player_controlled_objects[pco4] == (1, 0)
+    assert len(game.player_controlled_objects) == 2
+
+
+def test_clear_player_controlled_objects_clears_them():
+    game = BaseGame(initial_map=generate_valid_map())
+    game.player_controlled_objects[PlayerControlledObject("sprite.png")] = (0, 0)
+    game.player_controlled_objects[PlayerControlledObject("sprite.png")] = (1, 0)
+
+    game.clear_player_controlled_objects()
+
+    assert game.player_controlled_objects == {}
+
+
+def test_load_player_controlled_objects_loads_them():
+
+    game = BaseGame(initial_map=generate_valid_map())
+    pco1 = PlayerControlledObject("sprite.png")
+    pco2 = PlayerControlledObject("sprite.png")
+    load_map = Map([[pco1, pco2]], [[0, 0]], [[0, 0]], [[0, 0]], validate=False)
+
+    game.load_player_controlled_objects(load_map)
+
+    assert pco1 in game.player_controlled_objects
+    assert pco2 in game.player_controlled_objects
+    assert game.player_controlled_objects[pco1] == (0, 0)
+    assert game.player_controlled_objects[pco2] == (1, 0)

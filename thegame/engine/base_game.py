@@ -115,12 +115,7 @@ class BaseGame:
         self.active_screen = new_map
         self.active_menu = None
 
-        # Setup the player controlled object dictionary.
-        for object_tuple in new_map.player_controlled_objects:
-            self.register_player_controlled_object(
-                object_tuple[0], object_tuple[1], object_tuple[2]
-            )
-
+        self.load_player_controlled_objects(new_map)
         self.load_active_map()
 
     def open_menu(self, menu_name):
@@ -139,3 +134,10 @@ class BaseGame:
     def shutdown():
         pygame.event.post(pygame.event.Event(pygame.QUIT, dict=None))
         logging.info("Quit event posted to event queue. Game shutting down.")
+
+    def load_player_controlled_objects(self, new_map):
+        # Setup the player controlled object dictionary.
+        for object_tuple in new_map.player_controlled_objects:
+            self.register_player_controlled_object(
+                object_tuple[0], object_tuple[1], object_tuple[2]
+            )
