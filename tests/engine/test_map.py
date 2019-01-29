@@ -129,3 +129,17 @@ def test_player_controlled_objects_contains_all_player_controlled_objects_and_th
     assert (pco1, 0, 0) in player_controlled_objects
     assert (pco2, 1, 0) in player_controlled_objects
     assert len(player_controlled_objects) == 2
+
+
+def test_swap_done_on_sheet_less_than_0_raises_value_error():
+    test_map = Map([[1, 2]], [[1, 2]], [[1, 2]], [[1, 2]], validate=False)
+
+    with pytest.raises(ValueError):
+        test_map.swap((0, 1), (0, 1), Map.FOREGROUND_SHEET_INDEX - 1)
+
+
+def test_swap_done_on_sheet_greater_than_3_raises_value_error():
+    test_map = Map([[1, 2]], [[1, 2]], [[1, 2]], [[1, 2]], validate=False)
+
+    with pytest.raises(ValueError):
+        test_map.swap((0, 1), (0, 1), Map.BACKGROUND_SHEET_INDEX + 1)

@@ -34,6 +34,7 @@ class Engine:
         # Load the map if the game was not initialized with a
         # main menu.
         if self.context.active_menu is None:
+            self.context.load_player_controlled_objects(self.context.active_screen)
             self.context.load_active_map()
 
         self.running = True
