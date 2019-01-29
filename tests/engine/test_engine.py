@@ -11,7 +11,7 @@ from tests.test_utils import (
     generate_valid_map,
 )
 from thegame.engine import BaseGame, BaseMenu, Engine, Map
-from thegame.engine.game_objects import GameObject
+from thegame.engine.game_objects import GameObject, PlayerControlledObject
 
 
 def generate_keypress_pattern(characters, convert_to_keystroke=True):
@@ -385,3 +385,81 @@ def test_onscreen_sprites_are_correctly_added(
     assert all(
         call_arg[0].image is sprite_mock for call_arg in call_args if len(call_arg) >= 1
     )
+
+
+@patch("thegame.engine.engine.pygame.init", Mock())
+@patch("thegame.engine.engine.pygame.display", Mock())
+@patch("thegame.engine.engine.pygame.event.get", MagicMock())
+@patch("pygame.image.load", MagicMock())
+@patch("thegame.engine.engine.pygame.key.get_pressed")
+def test_handle_keystrokes_calls_each_player_controlled_objects_interaction(
+    keypress_mock
+):
+    pco1 = Mock(spec=PlayerControlledObject)
+    pco2 = Mock(spec=PlayerControlledObject)
+    pco1.sprite_location = "sprite.png"
+    pco2.sprite_location = "sprite.png"
+
+    keypress_mock.side_effect = generate_keypress_pattern(
+        ["w"], convert_to_keystroke=True
+    )
+
+    test_map = Map(
+        [[pco1, pco2]],
+        [[Mock(), Mock()]],
+        [[Mock(), Mock()]],
+        [[Mock(), Mock()]],
+        validate=False,
+    )
+    game = BaseGame(
+        initial_map=test_map, camera_width=3, camera_height=1, camera_x=1, camera_y=1
+    )
+    engine = Engine(game=game)
+
+    try:
+        engine.start()
+    except StopIteration:
+        # When keypresses have run out, a StopIteration exception will be thrown by mock.
+        # This exception will be used to tell when the necessary testing is done, and to
+        # stop the game, hence, pass.
+        pass
+
+    assert pco1.player_interaction.called
+    assert pco2.player_interaction.called
+
+
+@patch("thegame.engine.engine.pygame.init", Mock())
+@patch("thegame.engine.engine.pygame.display", Mock())
+@patch("pygame.image.load", MagicMock())
+@patch("thegame.engine.engine.pygame.key.get_pressed", MagicMock())
+@patch("thegame.engine.engine.pygame.event.get")
+def test_initializing_engine_with_game_loads_player_controlled_objects(event_queue):
+    pco1 = PlayerControlledObject("sprite.png")
+    pco2 = PlayerControlledObject("sprite.png")
+
+    test_map = Map(
+        [[pco1, pco2]],
+        [[Mock(), Mock()]],
+        [[Mock(), Mock()]],
+        [[Mock(), Mock()]],
+        validate=False,
+    )
+    game = BaseGame(
+        initial_map=test_map, camera_width=3, camera_height=1, camera_x=1, camera_y=1
+    )
+    engine = Engine(game=game)
+
+    event_queue.return_value = [DummyEvent(pygame.QUIT)]
+
+    try:
+        engine.start()
+    except StopIteration:
+        # When keypresses have run out, a StopIteration exception will be thrown by mock.
+        # This exception will be used to tell when the necessary testing is done, and to
+        # stop the game, hence, pass.
+        pass
+
+    assert pco1 in engine.context.player_controlled_objects
+    assert pco2 in engine.context.player_controlled_objects
+    assert engine.context.player_controlled_objects[pco1] == (0, 0)
+    assert engine.context.player_controlled_objects[pco2] == (1, 0)

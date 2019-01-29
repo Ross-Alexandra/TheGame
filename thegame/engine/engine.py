@@ -34,6 +34,7 @@ class Engine:
         # Load the map if the game was not initialized with a
         # main menu.
         if self.context.active_menu is None:
+            self.context.load_player_controlled_objects(self.context.active_screen)
             self.context.load_active_map()
 
         self.running = True
@@ -239,6 +240,12 @@ class Engine:
 
         up_arrow = chr(273)
         down_arrow = chr(274)
+
+        for player_controlled_object in self.context.player_controlled_objects.keys():
+            # TODO: Examine doing this in threads.
+            player_controlled_object.player_interaction(
+                keystrokes=keystrokes, context=self.context
+            )
 
         # If the current active screen is a menu
         if isinstance(self.context.active_screen, BaseMenu):
