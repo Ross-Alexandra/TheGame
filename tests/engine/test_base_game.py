@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pygame
 import pytest
 
-from tests.test_utils import generate_valid_map, get_base_menu
+from tests.test_utils import generate_sheet, generate_valid_map, get_base_menu
 from thegame.engine import BaseGame, Map
 from thegame.engine.game_objects import GameObject, PlayerControlledObject
 
@@ -211,9 +211,10 @@ def test_change_map_loads_new_player_controlled_objects_and_unloads_previous_one
 
 
 def test_clear_player_controlled_objects_clears_them():
+
     game = BaseGame(initial_map=generate_valid_map())
-    game.player_controlled_objects[PlayerControlledObject("sprite.png")] = (0, 0)
-    game.player_controlled_objects[PlayerControlledObject("sprite.png")] = (1, 0)
+    game.register_player_controlled_object(PlayerControlledObject("sprite.png"), 0, 0)
+    game.register_player_controlled_object(PlayerControlledObject("sprite.png"), 0, 1)
 
     game.clear_player_controlled_objects()
 
