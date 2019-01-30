@@ -9,7 +9,7 @@ from .base_menu import BaseMenu
 
 
 class Engine:
-    def __init__(self, game: BaseGame, event_thread_count: int=10):
+    def __init__(self, game: BaseGame, event_thread_count: int = 10):
         """ Initialize the game engine and give it a game.
 
             Args:
@@ -195,7 +195,10 @@ class Engine:
         for event in events:
             if self.running:
                 exception_check.append(
-                    (self.event_pool.apply_async(self._handle_event, args=(event,)), event)
+                    (
+                        self.event_pool.apply_async(self._handle_event, args=(event,)),
+                        event,
+                    )
                 )
 
         for possible_exception, event in exception_check:
