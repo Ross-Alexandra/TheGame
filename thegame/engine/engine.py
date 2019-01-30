@@ -22,6 +22,7 @@ class Engine:
         self.running = False
 
         self.display = None
+        self.buffer = None
         self.context = game
         self.width = game.screen_width
         self.height = game.screen_height
@@ -39,6 +40,8 @@ class Engine:
 
         pygame.display.set_caption(self.context.name)
         self.display = pygame.display.set_mode(self.size)
+        self.buffer = pygame.Surface(self.size)
+        self.buffer.fill((0, 0, 0))
 
         # Load in the game and load the active map if not a menu.
         self._load_map_sprites()
@@ -109,6 +112,7 @@ class Engine:
             #   clearing then re-adding all the sprites from
             #   the group seems inefficient.
             game_sprites.empty()
+            self.display.blit(self.buffer, (0, 0))
 
             # Discover which portion of the screen needs to be drawn
             if self.context.active_menu is not None:
@@ -138,6 +142,7 @@ class Engine:
                                     cell_index * self.context.base_sprite_width,
                                     row_index * self.context.base_sprite_height,
                                 )
+
                                 onscreen_sprites.append(cell.get_sprite())
 
                 for sprite in onscreen_sprites:
@@ -252,12 +257,6 @@ class Engine:
         up_arrow = chr(273)
         down_arrow = chr(274)
 
-        for player_controlled_object in self.context.player_controlled_objects.keys():
-            # TODO: Examine doing this in threads.
-            player_controlled_object.player_interaction(
-                keystrokes=keystrokes, context=self.context
-            )
-
         # If the current active screen is a menu
         if isinstance(self.context.active_screen, BaseMenu):
 
@@ -300,6 +299,16 @@ class Engine:
                     self.context.active_menu.call_interactive_zone_by_index(
                         self.context.active_menu.focused_zone, self.context
                     )
+
+        # If the current screen is a Map and not a BaseMenu
+        else:
+            for (
+                player_controlled_object
+            ) in self.context.player_controlled_objects.keys():
+                # TODO: Examine doing this in threads.
+                player_controlled_object.player_interaction(
+                    keystrokes=keystrokes, context=self.context
+                )
 
         keys_string = f"Pressed keys: {keystrokes}"
         logging.info(keys_string)
