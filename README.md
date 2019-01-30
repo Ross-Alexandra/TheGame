@@ -6,6 +6,43 @@
 # TheGame
 A basic 2D game with no current ideas for story, setting, etc.
 
+# Setting Up a Virtual Environment
+Before setting up the virtual environment, we first need to install virtualenv,
+```commandline
+python -m pip install virtualenv
+```
+
+then you need to create a virtual environment.
+```commandline
+python -m virtualenv venv
+```
+
+### Windows
+In order to activate the virtual environment that was created, run
+```commandline
+venv\Scripts\activate.bat
+```
+
+Once this has been run, before your pwd, ```(thegameenv)``` should appear before it.
+
+To deactivate this virtual env, run
+```commandline
+deactivate
+```
+
+### Linux
+In order to activate the virtual environment that was created, run
+```commandline
+source venv/bin/activate
+```
+
+Once this has been run, before your pwd, ```(thegameenv)``` should appear before it.
+
+To deactivate this virtual env, run
+```commandline
+deactivate
+```
+
 # Installation
 To install the requirements for this project, please run
 ```
