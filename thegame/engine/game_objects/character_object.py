@@ -52,10 +52,8 @@ class PlayerCharacter(PlayerControlledObject):
 
         current_pos = context.player_controlled_objects[self]
         sheet = context.active_screen.CHARACTER_SHEET_INDEX
-        logging.info(
+        logging.debug(
             f"PlayerControlledObject at {current_pos} is moving with {(up, down, left, right)}. "
-            f"Current value at location is: "
-            f"{context.active_screen.tile_sheets[sheet][current_pos[0]][current_pos[1]]}"
         )
 
         if up:

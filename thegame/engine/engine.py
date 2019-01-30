@@ -149,7 +149,6 @@ class Engine:
                     game_sprites.add(sprite)
 
             game_sprites.draw(self.display)
-            # self.display.
 
             # TODO: In conjunction with the above todo, a more efficient way of drawing should be found.
             pygame.display.flip()

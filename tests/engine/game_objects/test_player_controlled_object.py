@@ -36,6 +36,15 @@ def test_base_player_controlled_object_player_interaction_raises_not_implemented
 def test_player_character_move_moves_as_documented(
     up, down, left, right, initial_pos, final_pos
 ):
+    """
+    Documentation from the class:
+
+        "Going up always takes priority, going up or down takes priority
+        over going left and right, and going left takes priority over going right.
+        This means that if up and down, then the PC will move up; if up and
+        left, then the PC will move up; if down and right, then the PC will
+        move down; and if left and right, the PC will move left."
+    """
     pc = PlayerCharacter("sprite.png")
 
     game = BaseGame(MagicMock())
