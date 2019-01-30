@@ -12,7 +12,10 @@ Before setting up the virtual environment, we first need to install virtualenv,
 python -m pip install virtualenv
 ```
 
-then you need to create a virtual environment.
+then you need to create a virtual environment. First navigate to the
+directory that you would like to create the virtual environment at.
+ It is recommended *not* to create this in the thegame/ directory as
+ this may cause some issues if running black .
 ```commandline
 python -m virtualenv venv
 ```
