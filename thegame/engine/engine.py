@@ -9,7 +9,15 @@ from .base_menu import BaseMenu
 
 
 class Engine:
-    def __init__(self, game: BaseGame):
+    def __init__(self, game: BaseGame, event_thread_count: int=10):
+        """ Initialize the game engine and give it a game.
+
+            Args:
+                game(BaseGame): The game that this engine will start.
+                event_thread_count(int): The number of threads to process events with.
+                                         Default is 10 as 10 simultaneous events
+                                         *should* be enough.
+        """
 
         self.running = False
 
@@ -19,6 +27,11 @@ class Engine:
         self.height = game.screen_height
         self.size = self.width, self.height
         self.mouse_down_pos = None
+
+        # Each event should be independent of the other,
+        # thus we can process each one as if the others
+        # didn't happen.
+        self.event_pool = ThreadPool(processes=event_thread_count)
 
         pygame.init()
 
@@ -86,12 +99,11 @@ class Engine:
             # Get the number here as it is used multiple
             # times, speeding this up.
             events = pygame.event.get()
-            number_of_events = len(events)
 
             # Handle events if any have come in.
-            if number_of_events > 0:
+            if len(events) > 0:
 
-                self._schedule_events(events=events, number_of_events=number_of_events)
+                self._schedule_events(events=events)
 
             # TODO: Find a more efficient method of this.
             #   clearing then re-adding all the sprites from
@@ -164,11 +176,7 @@ class Engine:
             sprite.rect = sprite.image.get_rect()
             menu.menu_image = sprite
 
-    def _schedule_events(self, events, number_of_events):
-        # Each event should be independent of the other,
-        # thus we can process each one as if the others
-        # didn't happen.
-        event_pool = ThreadPool(processes=number_of_events)
+    def _schedule_events(self, events):
 
         # Because the events are running in a separate thread, an
         # exception thrown by them is hidden in the ThreadPool.
@@ -187,7 +195,7 @@ class Engine:
         for event in events:
             if self.running:
                 exception_check.append(
-                    (event_pool.apply_async(self._handle_event, args=(event,)), event)
+                    (self.event_pool.apply_async(self._handle_event, args=(event,)), event)
                 )
 
         for possible_exception, event in exception_check:
