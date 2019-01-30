@@ -69,6 +69,9 @@ def test_player_character_move_with_all_false_logs_warning(warning_mock):
         ["w", "s"],
         ["w", "d"],
         ["s", "d"],
+        ["a", "s", "w"],
+        ["w", "s", "d"],
+        ["w", "a", "s", "d"],
     ],
 )
 def test_player_character_player_interaction_calls_move(move_mock, keystrokes):
@@ -77,3 +80,16 @@ def test_player_character_player_interaction_calls_move(move_mock, keystrokes):
     pc.player_interaction(keystrokes, MagicMock())
 
     assert move_mock.called
+
+
+@patch("thegame.engine.game_objects.character_object.PlayerCharacter.move")
+def test_player_character_player_interaction_doesnt_call_move_when_no_correct_letters(
+    move_mock
+):
+    keystrokes = {chr(i) for i in range(128)}
+    keystrokes -= {"w", "a", "s", "d"}
+    pc = PlayerCharacter("sprite.png")
+
+    pc.player_interaction(keystrokes, MagicMock())
+
+    assert not move_mock.called
