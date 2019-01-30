@@ -2,7 +2,7 @@ import logging
 import sys
 
 from thegame.engine import BaseMenu, Engine, Map
-from thegame.engine.game_objects import GameObject
+from thegame.engine.game_objects import GameObject, PlayerCharacter
 from thegame.game_src import TheGame
 
 
@@ -13,19 +13,28 @@ def start_game():
         test_obj_one = GameObject(sprite_location="thegame/resources/TestBoxOne.png")
         test_obj_two = GameObject(sprite_location="thegame/resources/TestBoxTwo.png")
 
-        top_sheet = [[test_obj_one.clone() for _ in range(20)] for _ in range(20)]
+        top_sheet = [
+            [test_obj_one.clone() if not 8 <= _ <= 11 else None for _ in range(20)]
+            for _ in range(20)
+        ]
+        character_sheet = [[None for _ in range(20)] for _ in range(20)]
+        path_sheet = [[None for _ in range(20)] for _ in range(20)]
         bottom_sheet = [[test_obj_two.clone() for _ in range(20)] for _ in range(20)]
-        empty_sheet = [[None for _ in range(20)] for _ in range(20)]
-        main_map = Map(top_sheet, empty_sheet, empty_sheet, bottom_sheet)
+
+        character_sheet[10][10] = PlayerCharacter(
+            sprite_location="thegame/resources/PC.png"
+        )
+
+        main_map = Map(top_sheet, character_sheet, path_sheet, bottom_sheet)
 
         game = TheGame(
             initial_map=main_map,
-            screen_width=200,
-            screen_height=200,
+            screen_width=300,
+            screen_height=300,
             base_sprite_height=10,
             base_sprite_width=10,
-            camera_width=20,
-            camera_height=20,
+            camera_width=30,
+            camera_height=30,
             camera_x=10,
             camera_y=10,
         )
