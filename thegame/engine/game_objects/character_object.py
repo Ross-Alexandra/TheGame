@@ -29,8 +29,16 @@ class PlayerCharacter(PlayerControlledObject):
     SOUTH = 2
     WEST = 3
 
-    def __init__(self, facing_direction: int = NORTH, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        sprite_location: str,
+        animation: str = None,
+        name: str = None,
+        facing_direction: int = NORTH,
+    ):
+        super().__init__(
+            sprite_location=sprite_location, animation=animation, name=name
+        )
         self.facing = facing_direction
 
     def player_interaction(self, keystrokes, context):
@@ -93,7 +101,7 @@ class PlayerCharacter(PlayerControlledObject):
         if self.facing is PlayerCharacter.NORTH:
             facing_location = (pc_location[0], pc_location[1] - 1)
         elif self.facing is PlayerCharacter.EAST:
-            facing_location = (pc_location[0], 1, pc_location[1])
+            facing_location = (pc_location[0] + 1, pc_location[1])
         elif self.facing is PlayerCharacter.SOUTH:
             facing_location = (pc_location[0], pc_location[1] + 1)
         elif self.facing is PlayerCharacter.WEST:
@@ -103,23 +111,27 @@ class PlayerCharacter(PlayerControlledObject):
                 "Player Character is currently set to a value other than 0-3 "
                 "(North, East, South, West)."
             )
+        logging.debug(f"Player facing location {facing_location}")
+
+        sheets = {
+            context.active_screen.FOREGROUND_SHEET_INDEX,
+            context.active_screen.CHARACTER_SHEET_INDEX,
+            context.active_screen.PATH_SHEET_INDEX,
+            context.active_screen.BACKGROUND_SHEET_INDEX,
+        }
+        facing_x = facing_location[0]
+        facing_y = facing_location[1]
 
         # Check all 4 sheets from top to bottom looking for an
         # interactive game object.
         igo = None
-        for sheet in range(4):
+        for sheet in sheets:
             if isinstance(
-                context.active_screen.tile_sheets[sheet][facing_location[1]][
-                    facing_location[0]
-                ],
+                context.active_screen.tile_sheets[sheet][facing_y][facing_x],
                 InteractiveGameObject,
             ):
-                igo = context.active_screen.tile_sheets[sheet][facing_location[1]][
-                    facing_location[0]
-                ]
+                igo = context.active_screen.tile_sheets[sheet][facing_y][facing_x]
                 break
-        else:
-            logging.debug(f"No InteractiveGameObject found at {facing_location}")
 
         if igo is not None:
             igo.interact(context)

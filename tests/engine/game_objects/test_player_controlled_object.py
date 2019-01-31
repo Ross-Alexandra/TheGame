@@ -2,8 +2,12 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from thegame.engine import BaseGame
-from thegame.engine.game_objects import PlayerCharacter, PlayerControlledObject
+from thegame.engine import BaseGame, Map
+from thegame.engine.game_objects import (
+    InteractiveGameObject,
+    PlayerCharacter,
+    PlayerControlledObject,
+)
 
 
 def test_base_player_controlled_object_player_interaction_raises_not_implemented_error():
@@ -102,3 +106,109 @@ def test_player_character_player_interaction_doesnt_call_move_when_no_correct_le
     pc.player_interaction(keystrokes, MagicMock())
 
     assert not move_mock.called
+
+
+def test_player_character_facing_east_can_interact_with_igos():
+    igo = Mock(spec=InteractiveGameObject)
+    pc = PlayerCharacter(
+        sprite_location="sprite.png", facing_direction=PlayerCharacter.EAST
+    )
+
+    character_sheet = [[pc, igo]]
+    sheet = [[None, None]]
+
+    keystrokes = ["\r"]
+    test_map = Map(sheet, character_sheet, sheet, sheet)
+    game = BaseGame(initial_map=test_map)
+    game.register_player_controlled_object(pc, 0, 0)
+
+    pc.player_interaction(keystrokes, game)
+
+    assert igo.interact.called
+
+
+def test_player_character_facing_west_can_interact_with_igos():
+    igo = Mock(spec=InteractiveGameObject)
+    pc = PlayerCharacter(
+        sprite_location="sprite.png", facing_direction=PlayerCharacter.WEST
+    )
+
+    character_sheet = [[igo, pc]]
+    sheet = [[None, None]]
+
+    keystrokes = ["\r"]
+    test_map = Map(sheet, character_sheet, sheet, sheet)
+    game = BaseGame(initial_map=test_map)
+    game.register_player_controlled_object(pc, 1, 0)
+
+    pc.player_interaction(keystrokes, game)
+
+    assert igo.interact.called
+
+
+def test_player_character_facing_north_can_interact_with_igos():
+    igo = Mock(spec=InteractiveGameObject)
+    pc = PlayerCharacter(
+        sprite_location="sprite.png", facing_direction=PlayerCharacter.NORTH
+    )
+
+    character_sheet = [[igo], [pc]]
+    sheet = [[None], [None]]
+
+    keystrokes = ["\r"]
+    test_map = Map(sheet, character_sheet, sheet, sheet)
+    game = BaseGame(initial_map=test_map)
+    game.register_player_controlled_object(pc, 0, 1)
+
+    pc.player_interaction(keystrokes, game)
+
+    assert igo.interact.called
+
+
+def test_player_character_facing_south_can_interact_with_igos():
+    igo = Mock(spec=InteractiveGameObject)
+    pc = PlayerCharacter(
+        sprite_location="sprite.png", facing_direction=PlayerCharacter.SOUTH
+    )
+
+    character_sheet = [[pc], [igo]]
+    sheet = [[None], [None]]
+
+    keystrokes = ["\r"]
+    test_map = Map(sheet, character_sheet, sheet, sheet)
+    game = BaseGame(initial_map=test_map)
+    game.register_player_controlled_object(pc, 0, 0)
+
+    pc.player_interaction(keystrokes, game)
+
+    assert igo.interact.called
+
+
+def test_player_character_facing_invalid_direction_raises_attribute_error_when_interacting():
+    pc = PlayerCharacter(sprite_location="sprite.png", facing_direction=-1)
+
+    with pytest.raises(AttributeError):
+        pc.player_interaction(["\r"], MagicMock())
+
+
+def test_player_character_interacts_with_topmost_igo():
+    igo = Mock(spec=InteractiveGameObject)
+    igo2 = Mock(spec=InteractiveGameObject)
+    pc = PlayerCharacter(
+        sprite_location="sprite.png", facing_direction=PlayerCharacter.SOUTH
+    )
+
+    foreground_sheet = [[None], [igo]]
+
+    character_sheet = [[pc], [igo2]]
+    sheet = [[None], [igo2]]
+
+    keystrokes = ["\r"]
+    test_map = Map(foreground_sheet, character_sheet, sheet, sheet)
+    game = BaseGame(initial_map=test_map)
+    game.register_player_controlled_object(pc, 0, 0)
+
+    pc.player_interaction(keystrokes, game)
+
+    assert igo.interact.called
+    assert not igo2.interact.called
