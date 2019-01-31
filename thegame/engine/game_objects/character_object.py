@@ -111,7 +111,9 @@ class PlayerCharacter(PlayerControlledObject):
                 "Player Character is currently set to a value other than 0-3 "
                 "(North, East, South, West)."
             )
-        logging.debug(f"Player facing location {facing_location}")
+        logging.info(
+            f"PlayerCharacter attempting to interact with InteractiveGameObject at location: {facing_location}"
+        )
 
         sheets = {
             context.active_screen.FOREGROUND_SHEET_INDEX,
