@@ -1,7 +1,7 @@
 import logging
 from abc import abstractmethod
 
-from . import GameObject
+from . import GameObject, InteractiveGameObject
 
 
 class PlayerControlledObject(GameObject):
@@ -24,6 +24,23 @@ class PlayerCharacter(PlayerControlledObject):
         This class is a PlayerControlledObject which
         has built in functionality for movement."""
 
+    NORTH = 0
+    EAST = 1
+    SOUTH = 2
+    WEST = 3
+
+    def __init__(
+        self,
+        sprite_location: str,
+        animation: str = None,
+        name: str = None,
+        facing_direction: int = NORTH,
+    ):
+        super().__init__(
+            sprite_location=sprite_location, animation=animation, name=name
+        )
+        self.facing = facing_direction
+
     def player_interaction(self, keystrokes, context):
 
         # Check if any of WASD were pressed, and if so move.
@@ -40,6 +57,9 @@ class PlayerCharacter(PlayerControlledObject):
                 left="a" in keystrokes,
                 right="d" in keystrokes,
             )
+
+        if "\r" in keystrokes or "\n" in keystrokes:
+            self.call_interaction(context)
 
     def move(self, context, up=False, down=False, left=False, right=False):
         """ A class that moves the PC around the map in the directions specified.
@@ -73,3 +93,47 @@ class PlayerCharacter(PlayerControlledObject):
 
         context.player_controlled_objects[self] = new_pos
         context.active_screen.swap(current_pos, new_pos, sheet)
+
+    def call_interaction(self, context):
+
+        pc_location = context.player_controlled_objects[self]
+
+        if self.facing is PlayerCharacter.NORTH:
+            facing_location = (pc_location[0], pc_location[1] - 1)
+        elif self.facing is PlayerCharacter.EAST:
+            facing_location = (pc_location[0] + 1, pc_location[1])
+        elif self.facing is PlayerCharacter.SOUTH:
+            facing_location = (pc_location[0], pc_location[1] + 1)
+        elif self.facing is PlayerCharacter.WEST:
+            facing_location = (pc_location[0] - 1, pc_location[1])
+        else:
+            raise AttributeError(
+                "Player Character is currently set to a value other than 0-3 "
+                "(North, East, South, West)."
+            )
+        logging.info(
+            f"PlayerCharacter attempting to interact with InteractiveGameObject at location: {facing_location}"
+        )
+
+        sheets = {
+            context.active_screen.FOREGROUND_SHEET_INDEX,
+            context.active_screen.CHARACTER_SHEET_INDEX,
+            context.active_screen.PATH_SHEET_INDEX,
+            context.active_screen.BACKGROUND_SHEET_INDEX,
+        }
+        facing_x = facing_location[0]
+        facing_y = facing_location[1]
+
+        # Check all 4 sheets from top to bottom looking for an
+        # interactive game object.
+        igo = None
+        for sheet in sheets:
+            if isinstance(
+                context.active_screen.tile_sheets[sheet][facing_y][facing_x],
+                InteractiveGameObject,
+            ):
+                igo = context.active_screen.tile_sheets[sheet][facing_y][facing_x]
+                break
+
+        if igo is not None:
+            igo.interact(context)

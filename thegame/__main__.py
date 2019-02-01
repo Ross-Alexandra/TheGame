@@ -2,8 +2,24 @@ import logging
 import sys
 
 from thegame.engine import BaseMenu, Engine, Map
-from thegame.engine.game_objects import GameObject, PlayerCharacter
+from thegame.engine.game_objects import (
+    GameObject,
+    InteractiveGameObject,
+    PlayerCharacter,
+)
 from thegame.game_src import TheGame
+
+
+def exit_button_interaction(game_context, *args, **kwargs):
+    game_context.shutdown()
+
+
+class ExitObject(InteractiveGameObject):
+    """ An object used for testing that when interacted with
+        will exit the game."""
+
+    def interact(self, context):
+        exit_button_interaction(context)
 
 
 def start_game():
@@ -12,6 +28,7 @@ def start_game():
     if len(sys.argv) > 1 and sys.argv[1] == "-m":
         test_obj_one = GameObject(sprite_location="thegame/resources/TestBoxOne.png")
         test_obj_two = GameObject(sprite_location="thegame/resources/TestBoxTwo.png")
+        exit_obj = ExitObject(sprite_location="thegame/resources/ExitBox.png")
 
         top_sheet = [
             [test_obj_one.clone() if not 8 <= _ <= 11 else None for _ in range(20)]
@@ -24,6 +41,8 @@ def start_game():
         character_sheet[10][10] = PlayerCharacter(
             sprite_location="thegame/resources/PC.png"
         )
+
+        top_sheet[6][10] = exit_obj
 
         main_map = Map(top_sheet, character_sheet, path_sheet, bottom_sheet)
 
@@ -50,10 +69,6 @@ def start_game():
 
     game_engine = Engine(game)
     game_engine.start()
-
-
-def exit_button_interaction(game_context, *args, **kwargs):
-    game_context.shutdown()
 
 
 if __name__ == "__main__":
