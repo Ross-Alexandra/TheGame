@@ -114,6 +114,7 @@ def test_player_character_facing_east_can_interact_with_igos():
         sprite_location="sprite.png", facing_direction=PlayerCharacter.EAST
     )
 
+    # Create a map of 2x1 sheets as we only need to look east.
     character_sheet = [[pc, igo]]
     sheet = [[None, None]]
 
@@ -133,6 +134,7 @@ def test_player_character_facing_west_can_interact_with_igos():
         sprite_location="sprite.png", facing_direction=PlayerCharacter.WEST
     )
 
+    # Create a map of 2x1 sheets as we only need to look west.
     character_sheet = [[igo, pc]]
     sheet = [[None, None]]
 
@@ -152,6 +154,7 @@ def test_player_character_facing_north_can_interact_with_igos():
         sprite_location="sprite.png", facing_direction=PlayerCharacter.NORTH
     )
 
+    # Create a map of 1x2 sheets as we only need to look north.
     character_sheet = [[igo], [pc]]
     sheet = [[None], [None]]
 
@@ -171,6 +174,7 @@ def test_player_character_facing_south_can_interact_with_igos():
         sprite_location="sprite.png", facing_direction=PlayerCharacter.SOUTH
     )
 
+    # Create a map of 1x2 sheets as we only need to look south.
     character_sheet = [[pc], [igo]]
     sheet = [[None], [None]]
 
@@ -198,6 +202,7 @@ def test_player_character_interacts_with_topmost_igo():
         sprite_location="sprite.png", facing_direction=PlayerCharacter.SOUTH
     )
 
+    # Create a map of 1x2 sheets as we only need to look south.
     foreground_sheet = [[None], [igo]]
 
     character_sheet = [[pc], [igo2]]
