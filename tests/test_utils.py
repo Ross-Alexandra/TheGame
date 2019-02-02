@@ -43,7 +43,7 @@ def generate_sheet(data_is_valid, contents_are_valid=True):
     if data_is_valid or data_is_valid is None:
         return [[None, None], [None, None]]
     else:
-        return [[1, 1], [1, 1]]
+        return [[MagicMock(), MagicMock()], [MagicMock(), MagicMock()]]
 
 
 def generate_valid_map():

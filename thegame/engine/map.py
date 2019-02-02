@@ -1,3 +1,5 @@
+import logging
+
 from thegame.engine.game_objects import GameObject, PlayerControlledObject
 
 
@@ -84,13 +86,21 @@ class Map:
 
         return player_controlled_objects
 
-    def swap(self, tile_one: tuple, tile_two: tuple, sheet: int):
+    def swap(
+        self, tile_one: tuple, tile_two: tuple, sheet: int, ignore_collision=False
+    ):
         """ Swap two tiles.
 
             Args:
                 tile_one(tuple): x,y of one of the tiles
                 tile_two(tuple): x,y of the other tile.
                 sheet(int): The sheet number that the swap is happening on.
+                ignore_collision(bool): If this is False (default) then a swap will not
+                                        occur if either tile has collides as True.
+
+            Returns:
+                True: If no collisions occurred and the swap was successful,
+                False: Otherwise.
         """
 
         if not 0 <= sheet <= 3:
@@ -99,16 +109,27 @@ class Map:
                 " swap on sheet [0-3]."
             )
 
+        if not ignore_collision:
+            if not self._check_collision(sheet, tile_one, tile_two):
+                return False
+        else:
+            logging.warning(
+                "Moving objects that ignore collision can cause objects to move around on the map."
+                "Use this functionality with care as it may cause unexpected things to happen."
+            )
+
         tile_one_x = tile_one[0]
         tile_one_y = tile_one[1]
         tile_two_x = tile_two[0]
         tile_two_y = tile_two[1]
 
-        first_tile = self.tile_sheets[sheet][tile_one_y][tile_one_x]
-        second_tile = self.tile_sheets[sheet][tile_two_y][tile_two_x]
+        tile_one_object = self.tile_sheets[sheet][tile_one_y][tile_one_x]
+        tile_two_object = self.tile_sheets[sheet][tile_two_y][tile_two_x]
 
-        self.tile_sheets[sheet][tile_one_y][tile_one_x] = second_tile
-        self.tile_sheets[sheet][tile_two_y][tile_two_x] = first_tile
+        self.tile_sheets[sheet][tile_one_y][tile_one_x] = tile_two_object
+        self.tile_sheets[sheet][tile_two_y][tile_two_x] = tile_one_object
+
+        return True
 
     def _validate(self):
         """ Validate that each sheet is valid, if its not, raise an appropriate exception. """
@@ -222,6 +243,68 @@ class Map:
             )
 
         self._warp_zones.append(warp_zone)
+
+    def _check_collision(self, sheet, tile_one, tile_two):
+
+        # TODO: Right now these values are double calculated (ie, once here, and once in the
+        #       actual swap if there is no collision.) Further, the later tile_one_object
+        #       and tile_two_object are also double calculated.
+        tile_one_x, tile_one_y = tile_one
+        tile_two_x, tile_two_y = tile_two
+
+        logging.debug(f"Checking for collisions between {tile_one} and {tile_two}")
+        if tile_one_x < 0 or tile_two_x < 0:
+            logging.debug("Attempted to swap with an x off the left side of the map.")
+            return False
+        elif tile_one_y < 0 or tile_two_y < 0:
+            logging.debug("Attempted to swap with a y off the top of the map.")
+            return False
+
+        # Note, if the order of this and the check for the right side of the map are
+        #       swapped, then a IndexError may occur with the bottom check.
+        elif tile_one_y >= len(self.tile_sheets[sheet]) or tile_two_y >= len(
+            self.tile_sheets[sheet]
+        ):
+            logging.debug(f"Attempted to swap with a y off the bottom of the map.")
+            return False
+        elif tile_one_x >= len(
+            self.tile_sheets[sheet][tile_one_y]
+        ) or tile_two_x >= len(self.tile_sheets[sheet][tile_two_y]):
+            logging.debug(f"Attempted to swap with an x off the right side of the map.")
+            return False
+        elif any(
+            [
+                self.tile_sheets[i][tile_one_y][tile_one_x].collides
+                for i in range(4)
+                if self.tile_sheets[i][tile_one_y][tile_one_x] is not None
+            ]
+        ):
+            logging.debug(
+                f"A tile in a sheet other than number {sheet} that collide was found at {tile_one}"
+            )
+            return False
+        elif (
+            self.tile_sheets[sheet][tile_one_y][tile_one_x] is not None
+            and self.tile_sheets[sheet][tile_two_y][tile_two_x] is not None
+        ):
+            logging.debug(
+                f"Both {tile_one} and {tile_two} contain objects. These two objects are"
+                f" colliding and therefore no movement happened."
+            )
+            return False
+        elif any(
+            [
+                self.tile_sheets[i][tile_two_y][tile_two_x].collides
+                for i in range(4)
+                if self.tile_sheets[i][tile_two_y][tile_two_x] is not None
+            ]
+        ):
+            logging.debug(
+                f"A tile in a sheet other than number {sheet} that collide was found at {tile_two}"
+            )
+            return False
+
+        return True
 
     class InvalidObjectInSheetException(Exception):
         """ Raised when an invalid object type appears in

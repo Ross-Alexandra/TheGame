@@ -2,7 +2,7 @@ import pytest
 
 from tests.test_utils import generate_sheet, generate_valid_map
 from thegame.engine import Map
-from thegame.engine.game_objects import PlayerControlledObject
+from thegame.engine.game_objects import GameObject, PlayerControlledObject
 
 
 @pytest.mark.parametrize(
@@ -102,13 +102,18 @@ def test_registering_warp_zone_outside_warp_location_raises_exception():
 
 def test_swap_swaps_two_tiles():
 
-    output_sheet = [[2, 1]]
-    test_map = Map([[1, 2]], [[1, 2]], [[1, 2]], [[1, 2]], validate=False)
+    go1 = GameObject("sprite.png")
+    go2 = GameObject("sprite.png")
 
-    test_map.swap((0, 0), (1, 0), Map.FOREGROUND_SHEET_INDEX)
-    test_map.swap((0, 0), (1, 0), Map.CHARACTER_SHEET_INDEX)
-    test_map.swap((0, 0), (1, 0), Map.PATH_SHEET_INDEX)
-    test_map.swap((0, 0), (1, 0), Map.BACKGROUND_SHEET_INDEX)
+    output_sheet = [[go1, go2]]
+    test_map = Map(
+        [[go2, go1]], [[go2, go1]], [[go2, go1]], [[go2, go1]], validate=False
+    )
+
+    test_map.swap((0, 0), (1, 0), Map.FOREGROUND_SHEET_INDEX, ignore_collision=True)
+    test_map.swap((0, 0), (1, 0), Map.CHARACTER_SHEET_INDEX, ignore_collision=True)
+    test_map.swap((0, 0), (1, 0), Map.PATH_SHEET_INDEX, ignore_collision=True)
+    test_map.swap((0, 0), (1, 0), Map.BACKGROUND_SHEET_INDEX, ignore_collision=True)
 
     assert test_map.tile_sheets == (
         list(output_sheet),
