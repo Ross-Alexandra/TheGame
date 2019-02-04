@@ -229,7 +229,7 @@ def test_collision_occurs_when_collidable_object_moves_into_non_collidable_in_di
 def test_collision_occurs_when_two_object_on_same_sheet_would_swap(
     go1_collides, go2_collides
 ):
-    """ This test chaeks that if two objects, regardless of collision-ness, will collide
+    """ This test checks that if two objects, regardless of collision-ness, will collide
         if they are in the same sheet."""
     go1 = GameObject("sprite.png", collides=go1_collides)
     go2 = GameObject("sprite.png", collides=go2_collides)
@@ -239,3 +239,11 @@ def test_collision_occurs_when_two_object_on_same_sheet_would_swap(
     swapped = test_map.swap((0, 0), (1, 0), sheet=Map.FOREGROUND_SHEET_INDEX)
 
     assert not swapped
+
+
+def test_swap_returns_true_when_no_collisions_occur():
+    test_map = Map([[None, None]], [[None, None]], [[None, None]], [[None, None]])
+
+    swapped = test_map.swap((0, 0), (1, 0), sheet=Map.FOREGROUND_SHEET_INDEX)
+
+    assert swapped
