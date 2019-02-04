@@ -23,7 +23,7 @@ class ExitObject(InteractiveGameObject):
 
 
 def start_game():
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.INFO)
 
     if len(sys.argv) > 1 and sys.argv[1] == "-m":
         test_obj_one = GameObject(

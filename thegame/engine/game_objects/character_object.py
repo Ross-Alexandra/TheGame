@@ -101,8 +101,8 @@ class PlayerCharacter(PlayerControlledObject):
             logging.warning("CharacterObject.move called with all parameters False.")
             return
 
-        no_collisions = context.active_screen.swap(current_pos, new_pos, sheet)
-        if no_collisions:
+        tiles_swapped = context.active_screen.swap(current_pos, new_pos, sheet)
+        if tiles_swapped:
             context.player_controlled_objects[self] = new_pos
 
     def call_interaction(self, context):
