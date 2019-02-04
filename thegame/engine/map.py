@@ -110,6 +110,9 @@ class Map:
             )
 
         if not ignore_collision:
+
+            """ Don't just return the value of this, because if it returns True,
+                then we need to continue with the swap."""
             if not self._check_collision(sheet, tile_one, tile_two):
                 return False
         else:
