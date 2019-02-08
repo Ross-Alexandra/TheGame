@@ -69,8 +69,15 @@ This should manage running all of the tests.
 
 # Running the game
 Because this project is designed with modules, it must be run as
-```
+```commandline
 python -m thegame
 ```
 
-Running this from the root directory will cause it to run the game.
+Running this from the root directory will cause it to run the game
+with a main menu.
+
+For testing purposes, running the project as 
+```commandline
+python -m thegame -m
+```
+will run the game with an initial map.

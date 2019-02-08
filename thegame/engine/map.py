@@ -34,9 +34,9 @@ class Map:
     def __init__(
         self,
         foreground_sheet,
+        character_sheet,
         path_sheet,
         background_sheet,
-        character_sheet,
         validate=True,
     ):
 
