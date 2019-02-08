@@ -78,15 +78,19 @@ class PlayerCharacter(PlayerControlledObject):
 
         if up:
             new_pos = (current_pos[0], current_pos[1] - 1)
+            super().set_sprite("PC_up")
 
         elif down:
             new_pos = (current_pos[0], current_pos[1] + 1)
+            super().set_sprite("PC_down")
 
         elif left:
             new_pos = (current_pos[0] - 1, current_pos[1])
+            super().set_sprite("PC_left")
 
         elif right:
             new_pos = (current_pos[0] + 1, current_pos[1])
+            super().set_sprite("PC_right")
         else:
             logging.warning("CharacterObject.move called with all parameters False.")
             return

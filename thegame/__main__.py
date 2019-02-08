@@ -39,7 +39,12 @@ def start_game():
         bottom_sheet = [[test_obj_two.clone() for _ in range(20)] for _ in range(20)]
 
         character_sheet[10][10] = PlayerCharacter(
-            sprite_locations={"PC_sprite": "thegame/resources/PC.png"}
+            sprite_locations={
+                "PC_up": "thegame/resources/PC_up.png",
+                "PC_left": "thegame/resources/PC_left.png",
+                "PC_down": "thegame/resources/PC_down.png",
+                "PC_right": "thegame/resources/PC_right.png",
+            }
         )
 
         top_sheet[6][10] = exit_obj
