@@ -5,8 +5,8 @@ from . import GameObject, InteractiveGameObject
 
 
 class PlayerControlledObject(GameObject):
-    def __init__(self, sprite_location: str, animation: str = None, name: str = None):
-        super().__init__(sprite_location, animation, name)
+    def __init__(self, sprite_locations: dict, animation: str = None, name: str = None):
+        super().__init__(sprite_locations, animation, name)
 
     @abstractmethod
     def player_interaction(self, keystrokes, context):
@@ -31,13 +31,13 @@ class PlayerCharacter(PlayerControlledObject):
 
     def __init__(
         self,
-        sprite_location: str,
+        sprite_locations: dict,
         animation: str = None,
         name: str = None,
         facing_direction: int = NORTH,
     ):
         super().__init__(
-            sprite_location=sprite_location, animation=animation, name=name
+            sprite_locations=sprite_locations, animation=animation, name=name
         )
         self.facing = facing_direction
 

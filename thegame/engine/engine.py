@@ -167,7 +167,9 @@ class Engine:
                 for row in layer:
                     for game_object in row:
                         if game_object is not None:
-                            game_object_list_set.add(game_object.sprite_location)
+                            # loop me daddy
+                            for location in game_object.get_sprite_locations():
+                                game_object_list_set.add(location)
 
         for game_object_location in game_object_list_set:
             image = pygame.image.load(game_object_location).convert_alpha()

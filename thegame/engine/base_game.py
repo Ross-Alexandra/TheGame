@@ -71,7 +71,7 @@ class BaseGame:
             self.menus = {"main menu": main_menu}
             self.maps = {}
 
-        self.object_images = {}
+        self.object_images = {}  # {location: image}
         self.player_controlled_objects = {}
 
     def load_active_map(self):
@@ -79,17 +79,19 @@ class BaseGame:
             for row_index, row in enumerate(sheet):
                 for cell_index, cell in enumerate(row):
                     if cell is not None:
-                        sprite = pygame.sprite.Sprite()
-                        sprite.image = self.object_images[cell.sprite_location]
+                        for location in cell.get_sprite_locations():
 
-                        cell.register_loaded_sprite(sprite)
+                            sprite = pygame.sprite.Sprite()
+                            sprite.image = self.object_images[location]
+
+                            cell.register_loaded_sprite(sprite, location)
 
     def unload_active_map(self):
         for sheet in self.active_screen.tile_sheets:
             for row_index, row in enumerate(sheet):
                 for cell_index, cell in enumerate(row):
                     if cell is not None:
-                        cell.deregister_loaded_sprite()
+                        cell.deregister_loaded_sprites()
 
     def register_map(self, map_name: str, new_map: Map):
         self.maps[map_name] = new_map
