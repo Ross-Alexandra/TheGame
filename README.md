@@ -26,7 +26,7 @@ In order to activate the virtual environment that was created, run
 venv\Scripts\activate.bat
 ```
 
-Once this has been run, before your pwd, ```(thegameenv)``` should appear before it.
+Once this has been run, before your pwd, ```(venv)``` should appear before it.
 
 To deactivate this virtual env, run
 ```commandline
@@ -39,7 +39,7 @@ In order to activate the virtual environment that was created, run
 source venv/bin/activate
 ```
 
-Once this has been run, before your pwd, ```(thegameenv)``` should appear before it.
+Once this has been run, before your pwd, ```(venv)``` should appear before it.
 
 To deactivate this virtual env, run
 ```commandline
