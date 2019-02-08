@@ -64,13 +64,16 @@ class GameObject:
             raise AtturbuteError(
                 f"Sprite {sprite_name} not found in {type(self).__name__}"
             )
-        self.active_sprite_location = sprite_name
+        self.active_sprite_location = self.sprite_locations[sprite_name]
 
     def get_active_sprite_location(self, sprite_name):
         return self.sprite_locations[self.active_sprite_location]
 
     def get_sprite_locations(self):
         return list(self.sprite_locations.values())
+
+    def get_sprite_keys(self):
+        return list(self.sprite_locations.keys())
 
     def __str__(self):
         if self.name:
