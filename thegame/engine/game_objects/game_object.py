@@ -12,21 +12,20 @@ class GameObject:
             sprite_locations {name,location}
             _loaded_sprites {location, Sprite}
         """
-        if initial_sprite is None:
-            self.active_sprite_location = list(sprite_locations.values())[0]
-        else:
-            self.active_sprite_location = initial_sprite
-
         self.sprite_locations = sprite_locations
         self._loaded_sprites = {}
         self.animation = animation
         self.name = name
+        if initial_sprite is None and bool(sprite_locations):
+            self.active_sprite = list(self.sprite_locations.keys())[0]
+        else:
+            self.active_sprite = initial_sprite
 
     def clone(self):
         clone = GameObject(
             sprite_locations=self.sprite_locations,
             animation=self.animation,
-            initial_sprite=self.active_sprite_location,
+            initial_sprite=self.active_sprite,
         )
 
         return clone
@@ -35,6 +34,7 @@ class GameObject:
         self._loaded_sprites[location] = loaded_sprite
 
     def deregister_loaded_sprites(self):
+        self.active_sprite = None
         self._loaded_sprites = {}
 
     def set_sprite_position(self, pos_x, pos_y):
@@ -42,7 +42,7 @@ class GameObject:
             raise AttributeError(
                 f"Tried to set {type(self).__name__}'s position without registering a loaded sprite."
             )
-        loaded_sprite = self._loaded_sprites[self.active_sprite_location]
+        loaded_sprite = self._loaded_sprites[self.sprite_locations[self.active_sprite]]
 
         loaded_sprite.rect = loaded_sprite.image.get_rect()
         loaded_sprite.rect.x = pos_x
@@ -52,28 +52,28 @@ class GameObject:
         self.sprite_locations[name] = location
 
     def get_sprite(self):
-        if self._loaded_sprites is None:
+        if not bool(self._loaded_sprites):
             raise AttributeError(
-                f"Tried to get {type(self).__name__}'s sprite without registering it."
+                f"Tried to get {type(self).__name__}'s sprite without registering any sprites."
             )
-
-        return self._loaded_sprites[self.active_sprite_location]
+        if self.active_sprite is None and bool(self._loaded_sprites):
+            raise AttributeError(
+                f"{type(self).__name__}'s contains loaded sprites but has no active sprite"
+            )
+        return self._loaded_sprites[self.sprite_locations[self.active_sprite]]
 
     def set_sprite(self, sprite_name):
         if sprite_name not in self.sprite_locations:
             raise AtturbuteError(
                 f"Sprite {sprite_name} not found in {type(self).__name__}"
             )
-        self.active_sprite_location = self.sprite_locations[sprite_name]
+        self.active_sprite = sprite_name
 
-    def get_active_sprite_location(self, sprite_name):
-        return self.sprite_locations[self.active_sprite_location]
+    def get_active_sprite_location(self):
+        return self.sprite_locations[self.active_sprite]
 
     def get_sprite_locations(self):
         return list(self.sprite_locations.values())
-
-    def get_sprite_keys(self):
-        return list(self.sprite_locations.keys())
 
     def __str__(self):
         if self.name:
