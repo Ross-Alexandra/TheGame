@@ -361,9 +361,9 @@ def test_onscreen_sprites_are_correctly_added(
 
     image_load_mock.return_value = convert_alpha_mock
 
-    go1 = GameObject("sprite.png")
-    go2 = GameObject("sprite2.png")
-    go3 = GameObject("sprite3.png")
+    go1 = GameObject({"sprite": "sprite.png"})
+    go2 = GameObject({"sprite": "sprite.png"})
+    go3 = GameObject({"sprite": "sprite.png"})
 
     sheet = [
         [go1.clone(), go2.clone(), go3.clone()],
@@ -395,8 +395,8 @@ def test_onscreen_sprites_are_correctly_added(
 def test_handle_keystrokes_calls_each_player_controlled_objects_interaction(
     keypress_mock
 ):
-    pco1 = Mock(spec=PlayerControlledObject)
-    pco2 = Mock(spec=PlayerControlledObject)
+    pco1 = MagicMock(spec=PlayerControlledObject)
+    pco2 = MagicMock(spec=PlayerControlledObject)
     pco1.sprite_location = "sprite.png"
     pco2.sprite_location = "sprite.png"
 
@@ -406,9 +406,9 @@ def test_handle_keystrokes_calls_each_player_controlled_objects_interaction(
 
     test_map = Map(
         [[pco1, pco2]],
-        [[Mock(), Mock()]],
-        [[Mock(), Mock()]],
-        [[Mock(), Mock()]],
+        [[MagicMock(), MagicMock()]],
+        [[MagicMock(), MagicMock()]],
+        [[MagicMock(), MagicMock()]],
         validate=False,
     )
     game = BaseGame(
@@ -434,14 +434,14 @@ def test_handle_keystrokes_calls_each_player_controlled_objects_interaction(
 @patch("thegame.engine.engine.pygame.key.get_pressed", MagicMock())
 @patch("thegame.engine.engine.pygame.event.get")
 def test_initializing_engine_with_game_loads_player_controlled_objects(event_queue):
-    pco1 = PlayerControlledObject("sprite.png")
-    pco2 = PlayerControlledObject("sprite.png")
+    pco1 = PlayerControlledObject({"sprite": "sprite.png"})
+    pco2 = PlayerControlledObject({"sprite": "sprite.png"})
 
     test_map = Map(
         [[pco1, pco2]],
-        [[Mock(), Mock()]],
-        [[Mock(), Mock()]],
-        [[Mock(), Mock()]],
+        [[MagicMock(), MagicMock()]],
+        [[MagicMock(), MagicMock()]],
+        [[MagicMock(), MagicMock()]],
         validate=False,
     )
     game = BaseGame(

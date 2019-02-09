@@ -64,7 +64,7 @@ class GameObject:
 
     def set_sprite(self, sprite_name):
         if sprite_name not in self.sprite_locations:
-            raise AtturbuteError(
+            raise AttributeError(
                 f"Sprite {sprite_name} not found in {type(self).__name__}"
             )
         self.active_sprite = sprite_name
