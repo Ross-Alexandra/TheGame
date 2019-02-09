@@ -119,8 +119,8 @@ def test_swap_swaps_two_tiles():
 
 
 def test_player_controlled_objects_contains_all_player_controlled_objects_and_their_coordinates():
-    pco1 = PlayerControlledObject("sprite.png")
-    pco2 = PlayerControlledObject("sprite.png")
+    pco1 = PlayerControlledObject({"sprite": "sprite.png"})
+    pco2 = PlayerControlledObject({"sprite": "sprite.png"})
 
     test_map = Map([[pco1, pco2]], [[1, 2]], [[1, 2]], [[1, 2]], validate=False)
 

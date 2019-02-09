@@ -11,7 +11,7 @@ from thegame.engine.game_objects import (
 
 
 def test_base_player_controlled_object_player_interaction_raises_not_implemented_error():
-    pco = PlayerControlledObject("sprite")
+    pco = PlayerControlledObject({"sprite": "sprite.png"})
 
     with pytest.raises(NotImplementedError):
         pco.player_interaction([], Mock())
@@ -49,7 +49,14 @@ def test_player_character_move_moves_as_documented(
         left, then the PC will move up; if down and right, then the PC will
         move down; and if left and right, the PC will move left."
     """
-    pc = PlayerCharacter("sprite.png")
+    pc = PlayerCharacter(
+        sprite_locations={
+            "PC_up": "thegame/resources/PC_up.png",
+            "PC_left": "thegame/resources/PC_left.png",
+            "PC_down": "thegame/resources/PC_down.png",
+            "PC_right": "thegame/resources/PC_right.png",
+        }
+    )
 
     game = BaseGame(MagicMock())
     game.register_player_controlled_object(pc, *initial_pos)
@@ -61,7 +68,7 @@ def test_player_character_move_moves_as_documented(
 
 @patch("logging.warning")
 def test_player_character_move_with_all_false_logs_warning(warning_mock):
-    pc = PlayerCharacter("sprite.png")
+    pc = PlayerCharacter({"sprite": "sprite.png"})
 
     pc.move(MagicMock(), False, False, False, False)
 
@@ -88,7 +95,7 @@ def test_player_character_move_with_all_false_logs_warning(warning_mock):
     ],
 )
 def test_player_character_player_interaction_calls_move(move_mock, keystrokes):
-    pc = PlayerCharacter("sprite.png")
+    pc = PlayerCharacter({"sprite": "sprite.png"})
 
     pc.player_interaction(keystrokes, MagicMock())
 
@@ -101,7 +108,7 @@ def test_player_character_player_interaction_doesnt_call_move_when_no_correct_le
 ):
     keystrokes = {chr(i) for i in range(128)}
     keystrokes -= {"w", "a", "s", "d"}
-    pc = PlayerCharacter("sprite.png")
+    pc = PlayerCharacter({"sprite": "sprite.png"})
 
     pc.player_interaction(keystrokes, MagicMock())
 
@@ -111,7 +118,7 @@ def test_player_character_player_interaction_doesnt_call_move_when_no_correct_le
 def test_player_character_facing_east_can_interact_with_igos():
     igo = Mock(spec=InteractiveGameObject)
     pc = PlayerCharacter(
-        sprite_location="sprite.png", facing_direction=PlayerCharacter.EAST
+        sprite_locations={"sprite": "sprite.png"}, facing_direction=PlayerCharacter.EAST
     )
 
     # Create a map of 2x1 sheets as we only need to look east.
@@ -131,7 +138,7 @@ def test_player_character_facing_east_can_interact_with_igos():
 def test_player_character_facing_west_can_interact_with_igos():
     igo = Mock(spec=InteractiveGameObject)
     pc = PlayerCharacter(
-        sprite_location="sprite.png", facing_direction=PlayerCharacter.WEST
+        sprite_locations={"sprite": "sprite.png"}, facing_direction=PlayerCharacter.WEST
     )
 
     # Create a map of 2x1 sheets as we only need to look west.
@@ -151,7 +158,8 @@ def test_player_character_facing_west_can_interact_with_igos():
 def test_player_character_facing_north_can_interact_with_igos():
     igo = Mock(spec=InteractiveGameObject)
     pc = PlayerCharacter(
-        sprite_location="sprite.png", facing_direction=PlayerCharacter.NORTH
+        sprite_locations={"sprite": "sprite.png"},
+        facing_direction=PlayerCharacter.NORTH,
     )
 
     # Create a map of 1x2 sheets as we only need to look north.
@@ -171,7 +179,8 @@ def test_player_character_facing_north_can_interact_with_igos():
 def test_player_character_facing_south_can_interact_with_igos():
     igo = Mock(spec=InteractiveGameObject)
     pc = PlayerCharacter(
-        sprite_location="sprite.png", facing_direction=PlayerCharacter.SOUTH
+        sprite_locations={"sprite": "sprite.png"},
+        facing_direction=PlayerCharacter.SOUTH,
     )
 
     # Create a map of 1x2 sheets as we only need to look south.
@@ -189,7 +198,7 @@ def test_player_character_facing_south_can_interact_with_igos():
 
 
 def test_player_character_facing_invalid_direction_raises_attribute_error_when_interacting():
-    pc = PlayerCharacter(sprite_location="sprite.png", facing_direction=-1)
+    pc = PlayerCharacter(sprite_locations={"sprite": "sprite.png"}, facing_direction=-1)
 
     with pytest.raises(AttributeError):
         pc.player_interaction(["\r"], MagicMock())
@@ -199,7 +208,8 @@ def test_player_character_interacts_with_topmost_igo():
     igo = Mock(spec=InteractiveGameObject)
     igo2 = Mock(spec=InteractiveGameObject)
     pc = PlayerCharacter(
-        sprite_location="sprite.png", facing_direction=PlayerCharacter.SOUTH
+        sprite_locations={"sprite": "sprite.png"},
+        facing_direction=PlayerCharacter.SOUTH,
     )
 
     # Create a map of 1x2 sheets as we only need to look south.
