@@ -93,9 +93,4 @@ class Camera:
 
             fov_tile_sheet.append(shrunk_tile_sheet)
 
-        logging.debug(
-            f"Returning tile sheet in fov for {self.camera_width}x{self.camera_height}:\n"
-            f"{pprint.pformat(fov_tile_sheet[0])}"
-        )
-
         return fov_tile_sheet

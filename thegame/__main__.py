@@ -26,12 +26,18 @@ def start_game():
     logging.getLogger().setLevel(logging.INFO)
 
     if len(sys.argv) > 1 and sys.argv[1] == "-m":
-        test_obj_one = GameObject(sprite_location="thegame/resources/TestBoxOne.png")
+        test_obj_one = GameObject(
+            sprite_location="thegame/resources/TestBoxOne.png", collides=True
+        )
         test_obj_two = GameObject(sprite_location="thegame/resources/TestBoxTwo.png")
-        exit_obj = ExitObject(sprite_location="thegame/resources/ExitBox.png")
+        exit_obj = ExitObject(
+            sprite_location="thegame/resources/ExitBox.png", collides=True
+        )
 
         top_sheet = [
             [test_obj_one.clone() if not 8 <= _ <= 11 else None for _ in range(20)]
+            if not 8 <= _ <= 11
+            else [None for __ in range(20)]
             for _ in range(20)
         ]
         character_sheet = [[None for _ in range(20)] for _ in range(20)]

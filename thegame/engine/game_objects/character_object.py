@@ -5,8 +5,14 @@ from . import GameObject, InteractiveGameObject
 
 
 class PlayerControlledObject(GameObject):
-    def __init__(self, sprite_location: str, animation: str = None, name: str = None):
-        super().__init__(sprite_location, animation, name)
+    def __init__(
+        self,
+        sprite_location: str,
+        animation: str = None,
+        name: str = None,
+        collides=False,
+    ):
+        super().__init__(sprite_location, animation, name, collides)
 
     @abstractmethod
     def player_interaction(self, keystrokes, context):
@@ -35,9 +41,13 @@ class PlayerCharacter(PlayerControlledObject):
         animation: str = None,
         name: str = None,
         facing_direction: int = NORTH,
+        collides=False,
     ):
         super().__init__(
-            sprite_location=sprite_location, animation=animation, name=name
+            sprite_location=sprite_location,
+            animation=animation,
+            name=name,
+            collides=collides,
         )
         self.facing = facing_direction
 
@@ -91,8 +101,9 @@ class PlayerCharacter(PlayerControlledObject):
             logging.warning("CharacterObject.move called with all parameters False.")
             return
 
-        context.player_controlled_objects[self] = new_pos
-        context.active_screen.swap(current_pos, new_pos, sheet)
+        tiles_swapped = context.active_screen.swap(current_pos, new_pos, sheet)
+        if tiles_swapped:
+            context.player_controlled_objects[self] = new_pos
 
     def call_interaction(self, context):
 

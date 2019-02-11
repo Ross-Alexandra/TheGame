@@ -2,7 +2,7 @@ import pytest
 
 from tests.test_utils import generate_sheet, generate_valid_map
 from thegame.engine import Map
-from thegame.engine.game_objects import PlayerControlledObject
+from thegame.engine.game_objects import GameObject, PlayerControlledObject
 
 
 @pytest.mark.parametrize(
@@ -102,13 +102,18 @@ def test_registering_warp_zone_outside_warp_location_raises_exception():
 
 def test_swap_swaps_two_tiles():
 
-    output_sheet = [[2, 1]]
-    test_map = Map([[1, 2]], [[1, 2]], [[1, 2]], [[1, 2]], validate=False)
+    go1 = GameObject("sprite.png")
+    go2 = GameObject("sprite.png")
 
-    test_map.swap((0, 0), (1, 0), Map.FOREGROUND_SHEET_INDEX)
-    test_map.swap((0, 0), (1, 0), Map.CHARACTER_SHEET_INDEX)
-    test_map.swap((0, 0), (1, 0), Map.PATH_SHEET_INDEX)
-    test_map.swap((0, 0), (1, 0), Map.BACKGROUND_SHEET_INDEX)
+    output_sheet = [[go1, go2]]
+    test_map = Map(
+        [[go2, go1]], [[go2, go1]], [[go2, go1]], [[go2, go1]], validate=False
+    )
+
+    test_map.swap((0, 0), (1, 0), Map.FOREGROUND_SHEET_INDEX, ignore_collision=True)
+    test_map.swap((0, 0), (1, 0), Map.CHARACTER_SHEET_INDEX, ignore_collision=True)
+    test_map.swap((0, 0), (1, 0), Map.PATH_SHEET_INDEX, ignore_collision=True)
+    test_map.swap((0, 0), (1, 0), Map.BACKGROUND_SHEET_INDEX, ignore_collision=True)
 
     assert test_map.tile_sheets == (
         list(output_sheet),
@@ -143,3 +148,102 @@ def test_swap_done_on_sheet_greater_than_3_raises_value_error():
 
     with pytest.raises(ValueError):
         test_map.swap((0, 1), (0, 1), Map.BACKGROUND_SHEET_INDEX + 1)
+
+
+def test_collision_is_not_registered_when_ignore_collision_is_true_in_swap():
+    pco1 = PlayerControlledObject("sprite.png", collides=True)
+    pco2 = PlayerControlledObject("sprite.png", collides=True)
+    test_map = Map([[pco1, pco2]], [[None, None]], [[None, None]], [[None, None]])
+
+    test_map.swap(
+        (1, 0), (0, 0), sheet=Map.FOREGROUND_SHEET_INDEX, ignore_collision=True
+    )
+
+    # Check that a swap did happen.
+    assert test_map.tile_sheets[Map.FOREGROUND_SHEET_INDEX][0][0] is pco2
+    assert test_map.tile_sheets[Map.FOREGROUND_SHEET_INDEX][0][1] is pco1
+
+
+def test_collision_occurs_when_one_swap_would_be_off_left_of_screen():
+
+    test_map = generate_valid_map()
+
+    swapped = test_map.swap((-1, 0), (0, 0), sheet=0)
+
+    assert not swapped
+
+
+def test_collision_occurs_when_one_swap_would_be_off_top_of_screen():
+
+    test_map = generate_valid_map()
+
+    swapped = test_map.swap((0, -1), (0, 0), sheet=0)
+
+    assert not swapped
+
+
+def test_collision_occurs_when_one_swap_would_be_off_right_of_screen():
+
+    test_map = generate_valid_map()  # Generates a 2z2
+
+    swapped = test_map.swap((2, 0), (1, 0), sheet=0)
+
+    assert not swapped
+
+
+def test_collision_occurs_when_one_swap_would_be_bottom_right_of_screen():
+
+    test_map = generate_valid_map()  # Generates a 2z2
+
+    swapped = test_map.swap((0, 2), (0, 1), sheet=0)
+
+    assert not swapped
+
+
+def test_collision_occurs_with_collidable_objects_in_other_sheets():
+    go = GameObject("sprite.png", collides=False)
+    collision_go = GameObject("sprite.png", collides=True)
+
+    test_map = Map([[go, None]], [[None, collision_go]], [[None, None]], [[None, None]])
+
+    swapped = test_map.swap((0, 0), (1, 0), sheet=Map.FOREGROUND_SHEET_INDEX)
+
+    assert not swapped
+
+
+def test_collision_occurs_when_collidable_object_moves_into_non_collidable_in_different_sheet():
+    go = GameObject("sprite.png", collides=False)
+    collision_go = GameObject("sprite.png", collides=True)
+
+    test_map = Map([[go, None]], [[None, collision_go]], [[None, None]], [[None, None]])
+
+    swapped = test_map.swap((0, 0), (1, 0), sheet=Map.CHARACTER_SHEET_INDEX)
+
+    assert not swapped
+
+
+@pytest.mark.parametrize(
+    "go1_collides, go2_collides",
+    [(True, True), (True, False), (False, True), (False, False)],
+)
+def test_collision_occurs_when_two_object_on_same_sheet_would_swap(
+    go1_collides, go2_collides
+):
+    """ This test checks that if two objects, regardless of collision-ness, will collide
+        if they are in the same sheet."""
+    go1 = GameObject("sprite.png", collides=go1_collides)
+    go2 = GameObject("sprite.png", collides=go2_collides)
+
+    test_map = Map([[go1, go2]], [[None, None]], [[None, None]], [[None, None]])
+
+    swapped = test_map.swap((0, 0), (1, 0), sheet=Map.FOREGROUND_SHEET_INDEX)
+
+    assert not swapped
+
+
+def test_swap_returns_true_when_no_collisions_occur():
+    test_map = Map([[None, None]], [[None, None]], [[None, None]], [[None, None]])
+
+    swapped = test_map.swap((0, 0), (1, 0), sheet=Map.FOREGROUND_SHEET_INDEX)
+
+    assert swapped

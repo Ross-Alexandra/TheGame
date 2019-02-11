@@ -1,16 +1,25 @@
 class GameObject:
     """ An object that will be used to fill the objects sheet of a game."""
 
-    def __init__(self, sprite_location: str, animation: str = None, name: str = None):
+    def __init__(
+        self,
+        sprite_location: str,
+        animation: str = None,
+        name: str = None,
+        collides=False,
+    ):
 
         self.sprite_location = sprite_location
         self.animation = animation
         self._loaded_sprite = None
         self.name = name
+        self.collides = collides
 
     def clone(self):
         clone = GameObject(
-            sprite_location=self.sprite_location, animation=self.animation
+            sprite_location=self.sprite_location,
+            animation=self.animation,
+            collides=self.collides,
         )
 
         return clone

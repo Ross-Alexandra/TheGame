@@ -123,9 +123,6 @@ class Engine:
                 fov_tile_sheet = self.context.camera.get_camera_fov(
                     self.context.active_screen
                 )
-                logging.debug(
-                    f"Got the following fov_tile_sheet: {pprint.pformat(fov_tile_sheet, indent=4)}"
-                )
 
                 # Currently, this is done with (4 * camera_width * camera_height) loops.
                 # the only way to reduce this is to not loop over rows full of Nones, but
@@ -135,9 +132,6 @@ class Engine:
                     for row_index, row in enumerate(layer):
                         for cell_index, cell in enumerate(row):
                             if cell is not None:
-                                logging.debug(
-                                    f"{cell_index}: Setting the position of a {type(cell).__name__} on the screen."
-                                )
                                 cell.set_sprite_position(
                                     cell_index * self.context.base_sprite_width,
                                     row_index * self.context.base_sprite_height,
