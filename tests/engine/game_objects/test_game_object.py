@@ -73,6 +73,9 @@ def test_get_sprite_returns_sprite():
 def test_get_sprite_with_no_active_sprite_throws_attribute_error():
 
     go = GameObject({"sprite": "sprite.png"})
+    sprite_mock = Mock()
+    go.register_loaded_sprite(sprite_mock, "sprite.png")
+
     go.active_sprite = None
 
     with pytest.raises(AttributeError):
@@ -146,3 +149,11 @@ def test_get_sprite_locations():
     )
 
     assert go.get_sprite_locations() == ["sprite1.png", "sprite2.png"]
+
+
+def test_set_sprite_with_non_existant_name_throws_error():
+
+    go = GameObject({"sprite": "sprite.png"})
+
+    with pytest.raises(AttributeError):
+        go.set_sprite("not_a_sprite")
