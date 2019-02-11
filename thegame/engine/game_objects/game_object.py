@@ -52,11 +52,13 @@ class GameObject:
         self.sprite_locations[name] = location
 
     def get_sprite(self):
+        # if self._loaded_sprites is empty
         if not bool(self._loaded_sprites):
             raise AttributeError(
                 f"Tried to get {type(self).__name__}'s sprite without registering any sprites."
             )
-        if self.active_sprite is None and bool(self._loaded_sprites):
+        # if self.active_sprite is None but _loaded_sprites is not empty
+        if self.active_sprite is None:
             raise AttributeError(
                 f"{type(self).__name__}'s contains loaded sprites but has no active sprite"
             )
