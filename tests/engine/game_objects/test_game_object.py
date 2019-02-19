@@ -46,7 +46,7 @@ def test_the_registered_sprite_can_be_loaded():
 
     go = GameObject({"sprite": "sprite.png"})
     sprite_mock = Mock()
-    go.register_loaded_sprite(sprite_mock, "sprite.png")
+    go.register_loaded_sprite("sprite.png", sprite_mock)
 
     assert go.get_sprite() is sprite_mock
 
@@ -55,7 +55,7 @@ def test_the_registered_spite_can_be_unloaded():
 
     go = GameObject({"sprite": "sprite.png"})
     sprite_mock = Mock()
-    go.register_loaded_sprite(sprite_mock, "sprite.png")
+    go.register_loaded_sprite("sprite.png", sprite_mock)
     go.deregister_loaded_sprites()
     with pytest.raises(AttributeError):
         go.get_sprite()
@@ -65,7 +65,7 @@ def test_get_sprite_returns_sprite():
 
     go = GameObject({"sprite": "sprite.png"})
     sprite_mock = Mock()
-    go.register_loaded_sprite(sprite_mock, "sprite.png")
+    go.register_loaded_sprite("sprite.png", sprite_mock)
 
     assert go.get_sprite() is sprite_mock
 
@@ -74,7 +74,7 @@ def test_get_sprite_with_no_active_sprite_throws_attribute_error():
 
     go = GameObject({"sprite": "sprite.png"})
     sprite_mock = Mock()
-    go.register_loaded_sprite(sprite_mock, "sprite.png")
+    go.register_loaded_sprite("sprite.png", sprite_mock)
 
     go.active_sprite = None
 
@@ -94,7 +94,7 @@ def test_set_sprite_position_sets_position_correctly():
 
     go = GameObject({"sprite": "sprite.png"})
     sprite_mock = Mock()
-    go.register_loaded_sprite(sprite_mock, "sprite.png")
+    go.register_loaded_sprite("sprite.png", sprite_mock)
 
     go.set_sprite_position(pos_x=5, pos_y=4)
 
@@ -157,3 +157,10 @@ def test_set_sprite_with_non_existant_name_throws_error():
 
     with pytest.raises(AttributeError):
         go.set_sprite("not_a_sprite")
+
+
+def test_initialize_without_initial_sprite_sets_random_sprite():
+
+    go = GameObject({"sprite1": "sprite1.png", "sprite2": "sprite2.png"})
+
+    assert go.active_sprite is not None

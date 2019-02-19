@@ -135,8 +135,11 @@ def test_unload_active_map_sets_game_object_sprites_to_none():
 
     with pytest.raises(AttributeError):
         base_sheet[0][0].get_sprite()
+    with pytest.raises(AttributeError):
         base_sheet[0][1].get_sprite()
+    with pytest.raises(AttributeError):
         base_sheet[1][0].get_sprite()
+    with pytest.raises(AttributeError):
         base_sheet[1][1].get_sprite()
 
 
@@ -214,12 +217,11 @@ def test_change_map_loads_new_player_controlled_objects_and_unloads_previous_one
 def test_clear_player_controlled_objects_clears_them():
 
     game = BaseGame(initial_map=generate_valid_map())
-    game.register_player_controlled_object(
-        PlayerControlledObject({"sprite": "sprite.png"}), 0, 0
-    )
-    game.register_player_controlled_object(
-        PlayerControlledObject({"sprite": "sprite.png"}), 0, 1
-    )
+    pco1 = PlayerControlledObject({"sprite": "sprite.png"})
+    pco2 = PlayerControlledObject({"sprite": "sprite.png"})
+
+    game.register_player_controlled_object(pco1, 0, 0)
+    game.register_player_controlled_object(pco2, 0, 1)
 
     game.clear_player_controlled_objects()
 

@@ -106,5 +106,5 @@ venv.bak/
 #Pycharm
 .idea/*
 
-#Pycharm
+#Visual Studio
 .vs/

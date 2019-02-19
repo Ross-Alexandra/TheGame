@@ -84,7 +84,7 @@ class BaseGame:
                             sprite = pygame.sprite.Sprite()
                             sprite.image = self.object_images[location]
 
-                            cell.register_loaded_sprite(sprite, location)
+                            cell.register_loaded_sprite(location, sprite)
 
     def unload_active_map(self):
         for sheet in self.active_screen.tile_sheets:

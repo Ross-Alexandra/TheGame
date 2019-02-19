@@ -51,10 +51,10 @@ def test_player_character_move_moves_as_documented(
     """
     pc = PlayerCharacter(
         sprite_locations={
-            "PC_up": "thegame/resources/PC_up.png",
-            "PC_left": "thegame/resources/PC_left.png",
-            "PC_down": "thegame/resources/PC_down.png",
-            "PC_right": "thegame/resources/PC_right.png",
+            "PC_north": "thegame/resources/PC_north.png",
+            "PC_east": "thegame/resources/PC_east.png",
+            "PC_south": "thegame/resources/PC_south.png",
+            "PC_west": "thegame/resources/PC_west.png",
         }
     )
 

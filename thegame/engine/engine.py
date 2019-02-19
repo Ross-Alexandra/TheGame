@@ -167,7 +167,6 @@ class Engine:
                 for row in layer:
                     for game_object in row:
                         if game_object is not None:
-                            # loop me daddy
                             for location in game_object.get_sprite_locations():
                                 game_object_list_set.add(location)
 
