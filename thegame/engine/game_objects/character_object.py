@@ -5,8 +5,14 @@ from . import GameObject, InteractiveGameObject
 
 
 class PlayerControlledObject(GameObject):
-    def __init__(self, sprite_location: str, animation: str = None, name: str = None):
-        super().__init__(sprite_location, animation, name)
+    def __init__(
+        self,
+        sprite_locations: dict,
+        initial_sprite: str = None,
+        animation: str = None,
+        name: str = None,
+    ):
+        super().__init__(sprite_locations, initial_sprite, animation, name)
 
     @abstractmethod
     def player_interaction(self, keystrokes, context):
@@ -31,13 +37,17 @@ class PlayerCharacter(PlayerControlledObject):
 
     def __init__(
         self,
-        sprite_location: str,
+        sprite_locations: dict,
+        initial_sprite: str = None,
         animation: str = None,
         name: str = None,
         facing_direction: int = NORTH,
     ):
         super().__init__(
-            sprite_location=sprite_location, animation=animation, name=name
+            sprite_locations=sprite_locations,
+            initial_sprite=initial_sprite,
+            animation=animation,
+            name=name,
         )
         self.facing = facing_direction
 
@@ -78,15 +88,19 @@ class PlayerCharacter(PlayerControlledObject):
 
         if up:
             new_pos = (current_pos[0], current_pos[1] - 1)
+            self.set_sprite("PC_north")
 
         elif down:
             new_pos = (current_pos[0], current_pos[1] + 1)
+            self.set_sprite("PC_south")
 
         elif left:
             new_pos = (current_pos[0] - 1, current_pos[1])
+            self.set_sprite("PC_west")
 
         elif right:
             new_pos = (current_pos[0] + 1, current_pos[1])
+            self.set_sprite("PC_east")
         else:
             logging.warning("CharacterObject.move called with all parameters False.")
             return

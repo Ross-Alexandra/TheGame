@@ -1,4 +1,4 @@
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pygame
 import pytest
@@ -121,7 +121,7 @@ def test_open_menu_unloads_current_map(unload_map_mock):
 
 
 def test_unload_active_map_sets_game_object_sprites_to_none():
-    go = GameObject("sprite.png")
+    go = GameObject({"sprite": "sprite.png"})
 
     base_sheet = [[go.clone(), go.clone()], [go.clone(), go.clone()]]
 
@@ -133,14 +133,18 @@ def test_unload_active_map_sets_game_object_sprites_to_none():
 
     game.unload_active_map()
 
-    assert base_sheet[0][0]._loaded_sprite is None
-    assert base_sheet[0][1]._loaded_sprite is None
-    assert base_sheet[1][0]._loaded_sprite is None
-    assert base_sheet[1][1]._loaded_sprite is None
+    with pytest.raises(AttributeError):
+        base_sheet[0][0].get_sprite()
+    with pytest.raises(AttributeError):
+        base_sheet[0][1].get_sprite()
+    with pytest.raises(AttributeError):
+        base_sheet[1][0].get_sprite()
+    with pytest.raises(AttributeError):
+        base_sheet[1][1].get_sprite()
 
 
 def test_load_active_maps_sets_game_object_sprites():
-    go = GameObject("sprite.png")
+    go = GameObject({"sprite": "sprite.png"})
     base_sheet = [[go.clone(), go.clone()], [go.clone(), go.clone()]]
     base_map = Map(
         list(base_sheet), list(base_sheet), list(base_sheet), list(base_sheet)
@@ -161,7 +165,7 @@ def test_load_active_maps_sets_game_object_sprites():
 
 
 def test_register_player_controlled_object_correctly_registers():
-    pco = PlayerControlledObject("sprite.txt")
+    pco = PlayerControlledObject({"sprite": "sprite.png"})
 
     game = BaseGame(initial_map=generate_valid_map())
 
@@ -171,16 +175,16 @@ def test_register_player_controlled_object_correctly_registers():
     assert len(game.player_controlled_objects) == 1
 
 
-@patch("pygame.sprite.Sprite", Mock())
+@patch("pygame.sprite.Sprite", MagicMock())
 def test_change_map_loads_new_player_controlled_objects_and_unloads_previous_ones():
 
-    pco1 = PlayerControlledObject("sprite.png")
-    pco2 = PlayerControlledObject("sprite.png")
-    pco3 = PlayerControlledObject("sprite.png")
-    pco4 = PlayerControlledObject("sprite.png")
+    pco1 = PlayerControlledObject({"sprite": "sprite.png"})
+    pco2 = PlayerControlledObject({"sprite": "sprite.png"})
+    pco3 = PlayerControlledObject({"sprite": "sprite.png"})
+    pco4 = PlayerControlledObject({"sprite": "sprite.png"})
 
-    go_mock = Mock()
-    go_mock.sprite_location = "sprite.png"
+    go_mock = MagicMock()
+    go_mock.sprite_locations = {"sprite": "sprite.png"}
 
     test_map = Map(
         [[pco1, pco2]],
@@ -213,8 +217,11 @@ def test_change_map_loads_new_player_controlled_objects_and_unloads_previous_one
 def test_clear_player_controlled_objects_clears_them():
 
     game = BaseGame(initial_map=generate_valid_map())
-    game.register_player_controlled_object(PlayerControlledObject("sprite.png"), 0, 0)
-    game.register_player_controlled_object(PlayerControlledObject("sprite.png"), 0, 1)
+    pco1 = PlayerControlledObject({"sprite": "sprite.png"})
+    pco2 = PlayerControlledObject({"sprite": "sprite.png"})
+
+    game.register_player_controlled_object(pco1, 0, 0)
+    game.register_player_controlled_object(pco2, 0, 1)
 
     game.clear_player_controlled_objects()
 
@@ -224,8 +231,8 @@ def test_clear_player_controlled_objects_clears_them():
 def test_load_player_controlled_objects_loads_them():
 
     game = BaseGame(initial_map=generate_valid_map())
-    pco1 = PlayerControlledObject("sprite.png")
-    pco2 = PlayerControlledObject("sprite.png")
+    pco1 = PlayerControlledObject({"sprite": "sprite.png"})
+    pco2 = PlayerControlledObject({"sprite": "sprite.png"})
     load_map = Map([[pco1, pco2]], [[0, 0]], [[0, 0]], [[0, 0]], validate=False)
 
     game.load_player_controlled_objects(load_map)
