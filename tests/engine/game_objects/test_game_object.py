@@ -164,3 +164,25 @@ def test_initialize_without_initial_sprite_sets_random_sprite():
     go = GameObject({"sprite1": "sprite1.png", "sprite2": "sprite2.png"})
 
     assert go.active_sprite is not None
+
+
+def test_initialize_with_initial_sprite_not_in_dict_throws_error():
+
+    with pytest.raises(AttributeError):
+        go = GameObject(
+            {"sprite1": "sprite1.png", "sprite2": "sprite2.png"},
+            initial_sprite="not_a_sprite",
+        )
+
+
+def test_initial_sprite_argument_correctly_sets_sprite():
+
+    go = GameObject(
+        {
+            "sprite1": "sprite1.png",
+            "sprite2": "sprite2.png",
+            "sprite3": "sprite3.png",
+            "sprite4": "sprite4.png",
+        },
+        initial_sprite="sprite3",
+    )

@@ -12,7 +12,7 @@ class PlayerControlledObject(GameObject):
         animation: str = None,
         name: str = None,
     ):
-        super().__init__(sprite_locations, animation, name)
+        super().__init__(sprite_locations, initial_sprite, animation, name)
 
     @abstractmethod
     def player_interaction(self, keystrokes, context):
@@ -50,8 +50,6 @@ class PlayerCharacter(PlayerControlledObject):
             name=name,
         )
         self.facing = facing_direction
-        if initial_sprite is not None:
-            self.set_sprite(initial_sprite)
 
     def player_interaction(self, keystrokes, context):
 

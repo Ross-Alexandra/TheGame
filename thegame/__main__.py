@@ -44,7 +44,8 @@ def start_game():
                 "PC_west": "thegame/resources/PC_west.png",
                 "PC_south": "thegame/resources/PC_south.png",
                 "PC_east": "thegame/resources/PC_east.png",
-            }
+            },
+            initial_sprite="PC_south",
         )
 
         top_sheet[6][10] = exit_obj
